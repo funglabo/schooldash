@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolDash | Acceso Seguro</title>
+    <title>SchoolDash | Acceso Académico</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4 font-sans">
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4">
 
     <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-b-8 border-blue-600">
         <div class="text-center mb-10">
@@ -15,88 +19,128 @@
             <p class="text-slate-400 font-medium">Gestión Académica</p>
         </div>
 
-        <div class="space-y-5 text-left">
+        <div id="loginForm" class="space-y-5">
             <div>
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
-                <input id="email" type="email" placeholder="admin@escuela.com" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700 transition-all">
+                <input id="email" type="email" placeholder="correo@escuela.com" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700">
             </div>
             <div>
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1">Contraseña</label>
-                <input id="password" type="password" placeholder="••••••••" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700 transition-all">
+                <input id="password" type="password" placeholder="••••••••" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700">
             </div>
             
-            <button onclick="intentarLogin()" id="btnEntrar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 mt-2">
+            <button onclick="intentarLogin()" id="btnEntrar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95">
                 Entrar al Sistema
             </button>
             
-            <div id="mensajeEstado" class="text-center p-4 rounded-2xl text-sm font-semibold hidden"></div>
+            <div class="text-center pt-2">
+                <button onclick="alternarVista(true)" class="text-blue-600 text-sm font-semibold hover:underline">
+                    ¿No tienes cuenta? Regístrate aquí
+                </button>
+            </div>
         </div>
+
+        <div id="registroForm" class="space-y-5 hidden">
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nombre Completo</label>
+                <input id="regNombre" type="text" placeholder="Juan Pérez" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email Nuevo</label>
+                <input id="regEmail" type="email" placeholder="alumno@escuela.com" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Contraseña Nueva</label>
+                <input id="regPassword" type="password" placeholder="Mínimo 6 caracteres" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50">
+            </div>
+            
+            <button onclick="ejecutarRegistro()" id="btnRegistro" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all">
+                Crear Mi Cuenta
+            </button>
+            
+            <div class="text-center pt-2">
+                <button onclick="alternarVista(false)" class="text-slate-500 text-sm font-semibold hover:underline">
+                    ← Volver al Login
+                </button>
+            </div>
+        </div>
+        
+        <div id="mensajeEstado" class="text-center p-4 mt-4 rounded-2xl text-sm font-semibold hidden"></div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        // Coloca tus llaves aquí con mucho cuidado de mantener las comillas ''
+        // --- 1. CONFIGURACIÓN ---
         const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
         const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
+        // Cambiar entre Login y Registro
+        function alternarVista(mostrarRegistro) {
+            document.getElementById('loginForm').classList.toggle('hidden', mostrarRegistro);
+            document.getElementById('registroForm').classList.toggle('hidden', !mostrarRegistro);
+            document.getElementById('mensajeEstado').classList.add('hidden');
+        }
+
+        // LÓGICA DE LOGIN
         async function intentarLogin() {
-            const btn = document.getElementById('btnEntrar');
-            const mensaje = document.getElementById('mensajeEstado');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const mensaje = document.getElementById('mensajeEstado');
 
-            // 1. COMPROBACIÓN TÉCNICA: ¿Ya cargó la librería?
-            if (typeof supabase === 'undefined') {
-                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-amber-50 text-amber-700";
-                mensaje.innerText = "La conexión está tardando... reintenta en 3 segundos.";
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                const { data: perfil, error: errPerfil } = await supabaseClient
+                    .from('perfiles').select('rol').eq('id', data.user.id).single();
+
+                if (errPerfil) throw new Error("Perfil no encontrado.");
+
+                mensaje.className = "text-center p-4 mt-4 rounded-2xl text-sm font-semibold block bg-green-100 text-green-700";
+                mensaje.innerText = "¡Bienvenido!";
+
+                setTimeout(() => {
+                    if(perfil.rol === 'admin') window.location.href = 'admin.html';
+                    else alert("Has entrado como Estudiante (Panel en construcción)");
+                }, 600);
+
+            } catch (err) {
+                mensaje.className = "text-center p-4 mt-4 rounded-2xl text-sm font-semibold block bg-red-100 text-red-700";
+                mensaje.innerText = err.message;
+            }
+        }
+
+        // LÓGICA DE REGISTRO
+        async function ejecutarRegistro() {
+            const nombre = document.getElementById('regNombre').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const mensaje = document.getElementById('mensajeEstado');
+
+            if(!nombre || !email || !password) {
+                alert("Por favor rellena todos los campos");
                 return;
             }
 
-            // 2. INICIALIZACIÓN: Creamos el cliente justo ahora
-            const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
-
-            // UI Feedback
-            btn.innerText = "Validando...";
-            btn.disabled = true;
-            mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-blue-50 text-blue-600";
-            mensaje.innerText = "Conectando con la base de datos...";
-
             try {
-                // Paso 1: Autenticación (Auth)
-                const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
+                // 1. Registro en Auth
+                const { data, error: errAuth } = await supabaseClient.auth.signUp({ email, password });
+                if (errAuth) throw errAuth;
 
-                if (authError) throw authError;
-
-                // Paso 2: Buscar el Rol en la tabla de perfiles
-                const { data: perfil, error: perfilError } = await supabaseClient
+                // 2. Insertar en tabla perfiles (Rol por defecto: estudiante)
+                const { error: errPerfil } = await supabaseClient
                     .from('perfiles')
-                    .select('rol')
-                    .eq('id', authData.user.id)
-                    .single();
+                    .insert([{ id: data.user.id, nombre_completo: nombre, rol: 'estudiante' }]);
 
-                if (perfilError) throw new Error("Acceso correcto, pero no tienes un rol asignado en la tabla 'perfiles'.");
+                if (errPerfil) throw errPerfil;
 
-                // Paso 3: Éxito
-                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-green-100 text-green-700";
-                mensaje.innerText = "¡Bienvenido, " + perfil.rol + "!";
-                
-               setTimeout(() => {
-    if (perfil.rol === 'admin') {
-        window.location.href = 'admin.html';
-    } else {
-        alert("Tu panel (estudiante/docente) aún está en construcción.");
-    }
-}, 500);
+                mensaje.className = "text-center p-4 mt-4 rounded-2xl text-sm font-semibold block bg-green-100 text-green-700";
+                mensaje.innerText = "Cuenta creada. ¡Ya puedes iniciar sesión!";
+                setTimeout(() => alternarVista(false), 2000);
 
             } catch (err) {
-                // Manejo de errores visual
-                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-red-100 text-red-700";
-                mensaje.innerText = "Error: " + err.message;
-                btn.innerText = "Entrar al Sistema";
-                btn.disabled = false;
+                mensaje.className = "text-center p-4 mt-4 rounded-2xl text-sm font-semibold block bg-red-100 text-red-700";
+                mensaje.innerText = err.message;
             }
         }
     </script>
