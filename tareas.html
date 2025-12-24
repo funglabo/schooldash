@@ -2,161 +2,97 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Tareas | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10 shadow-sm">
-        <div class="container mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a href="estudiante.html" class="bg-slate-100 hover:bg-blue-50 p-2 rounded-xl text-blue-600 font-bold text-xs transition-all">
-                    ← Dashboard
-                </a>
-                <span class="font-black text-slate-800 uppercase text-sm tracking-widest text-blue-600">Mi Agenda</span>
-            </div>
+    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10">
+        <div class="container mx-auto flex items-center gap-4">
+            <a href="estudiante.html" class="bg-slate-100 p-2 rounded-xl text-blue-600 font-bold text-xs">← Dashboard</a>
+            <span class="font-black text-slate-800 uppercase text-sm">Mi Agenda</span>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-4 max-w-4xl">
         
         <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
-            <h3 class="font-black text-slate-800 text-xl mb-6 flex items-center gap-2">
-                <span class="bg-blue-100 p-2 rounded-lg text-lg">📝</span> Nueva Tarea Personal
-            </h3>
+            <h3 class="font-black text-slate-800 text-xl mb-6">📝 Nueva Tarea</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Título</label>
-                    <input id="tituloT" type="text" placeholder="¿Qué hay que hacer?" 
-                           class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <div class="flex flex-col gap-1 md:col-span-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Vincular a Materia</label>
+                    <select id="selectMateria" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <option value="">Cargando materias...</option>
+                    </select>
                 </div>
+
                 <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Fecha Límite</label>
-                    <input id="fechaT" type="date" 
-                           class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">¿Qué debes hacer?</label>
+                    <input id="tituloT" type="text" placeholder="Ej: Entregar ensayo" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Fecha de Entrega</label>
+                    <input id="fechaT" type="date" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
                 <div class="md:col-span-2 flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Detalles (Opcional)</label>
-                    <textarea id="descT" placeholder="Notas adicionales..." 
-                              class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"></textarea>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Notas</label>
+                    <textarea id="descT" placeholder="Detalles de la tarea..." class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"></textarea>
                 </div>
-                <button onclick="crearTareaPropia()" 
-                        class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-                    + Agregar a mi lista
+
+                <button onclick="crearTareaPropia()" class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                    Guardar Tarea
                 </button>
             </div>
         </div>
 
-        <div class="flex items-center justify-between mb-6 px-4">
-            <h3 class="font-bold text-slate-400 uppercase text-xs tracking-widest">Lista de actividades</h3>
-            <div id="stats" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Cargando tareas...</div>
-        </div>
-
-        <div id="listaTareas" class="grid grid-cols-1 gap-4">
-            </div>
+        <div id="listaTareas" class="grid grid-cols-1 gap-4"></div>
     </main>
 
     <script>
-        // --- CONFIGURACIÓN DE SUPABASE ---
-      const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        // --- CARGAR TAREAS ---
-        async function cargarTareas() {
+        // 1. CARGAR LAS MATERIAS EN EL SELECT AL INICIAR
+        async function cargarMateriasEnSelect() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return window.location.href = 'index.html';
+            
+            // Traemos las materias que el alumno tiene registradas
+            const { data: materias, error } = await supabaseClient
+                .from('materias_alumno')
+                .select('nombre_materia') // Asegúrate que este campo existe en tu tabla
+                .eq('alumno_id', user.id);
 
-            const { data: tareas, error } = await supabaseClient
-                .from('tareas')
-                .select('*')
-                .eq('alumno_id', user.id)
-                .order('terminada', { ascending: true }) 
-                .order('fecha_entrega', { ascending: true });
+            const select = document.getElementById('selectMateria');
+            select.innerHTML = '<option value="">-- Selecciona una Materia --</option>';
 
-            const contenedor = document.getElementById('listaTareas');
-            const stats = document.getElementById('stats');
-            contenedor.innerHTML = '';
-
-            if (error) {
-                console.error(error);
-                return;
-            }
-
-            // Actualizar contadores
-            const pendientes = tareas.filter(t => !t.terminada).length;
-            stats.innerText = `${pendientes} PENDIENTES / ${tareas.length} TOTAL`;
-
-            if (tareas.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-12 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center text-slate-400 italic">No tienes tareas registradas.</div>`;
-                return;
-            }
-
-            tareas.forEach(t => {
-                const esCompletada = t.terminada;
-                contenedor.innerHTML += `
-                    <div class="flex justify-between items-center p-6 rounded-[2rem] border transition-all duration-300 ${esCompletada ? 'bg-emerald-50 border-emerald-100 opacity-70' : 'bg-white border-slate-100 shadow-sm'}">
-                        <div class="flex items-center gap-5">
-                            <input type="checkbox" 
-                                   ${esCompletada ? 'checked' : ''} 
-                                   onchange="toggleTarea('${t.id}', ${esCompletada})"
-                                   class="w-6 h-6 rounded-full border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer">
-                            
-                            <div>
-                                <h4 class="font-bold ${esCompletada ? 'text-emerald-800 line-through' : 'text-slate-800'} text-lg">
-                                    ${t.titulo}
-                                </h4>
-                                <p class="text-xs ${esCompletada ? 'text-emerald-600' : 'text-slate-500'}">
-                                    ${t.descripcion || 'Sin descripción'}
-                                </p>
-                                <div class="mt-1 text-[10px] font-black uppercase ${esCompletada ? 'text-emerald-400' : 'text-blue-500'}">
-                                    📅 ${t.fecha_entrega}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="borrarTarea('${t.id}')" 
-                                class="bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 p-3 rounded-2xl transition-all group">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>`;
-            });
-        }
-
-        // --- FUNCIÓN BORRAR TAREA ---
-        async function borrarTarea(id) {
-            // Confirmación de seguridad
-            if (!confirm("¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.")) return;
-
-            const { error } = await supabaseClient
-                .from('tareas')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                alert("Hubo un error al borrar: " + error.message);
+            if (materias && materias.length > 0) {
+                materias.forEach(m => {
+                    select.innerHTML += `<option value="${m.nombre_materia}">${m.nombre_materia}</option>`;
+                });
             } else {
-                // Refrescamos la lista inmediatamente
-                cargarTareas();
+                select.innerHTML = '<option value="">No tienes materias registradas</option>';
             }
         }
 
+        // 2. CREAR TAREA VINCULADA
         async function crearTareaPropia() {
+            const materia = document.getElementById('selectMateria').value;
             const titulo = document.getElementById('tituloT').value;
             const fecha = document.getElementById('fechaT').value;
             const desc = document.getElementById('descT').value;
 
-            if (!titulo || !fecha) return alert("Título y Fecha son obligatorios");
+            if (!materia || !titulo || !fecha) return alert("Por favor selecciona una materia, título y fecha.");
 
             const { data: { user } } = await supabaseClient.auth.getUser();
 
             const { error } = await supabaseClient.from('tareas').insert([{ 
                 alumno_id: user.id, 
+                materia_nombre: materia, // Guardamos la materia vinculada
                 titulo: titulo,
                 descripcion: desc,
                 fecha_entrega: fecha,
@@ -165,22 +101,45 @@
 
             if (error) alert(error.message);
             else {
-                document.getElementById('tituloT').value = '';
-                document.getElementById('fechaT').value = '';
-                document.getElementById('descT').value = '';
-                cargarTareas();
+                alert("Tarea guardada con éxito");
+                location.reload(); // Recarga para limpiar campos y ver la lista
             }
         }
 
-        async function toggleTarea(id, estadoActual) {
-            const { error } = await supabaseClient
+        // 3. CARGAR LISTA DE TAREAS (Modificada para mostrar la materia)
+        async function cargarTareas() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { data: tareas } = await supabaseClient
                 .from('tareas')
-                .update({ terminada: !estadoActual })
-                .eq('id', id);
+                .select('*')
+                .eq('alumno_id', user.id)
+                .order('fecha_entrega', { ascending: true });
 
-            if (!error) cargarTareas();
+            const cont = document.getElementById('listaTareas');
+            cont.innerHTML = '';
+
+            tareas.forEach(t => {
+                cont.innerHTML += `
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] font-black bg-blue-100 text-blue-600 px-2 py-1 rounded-md uppercase">${t.materia_nombre || 'General'}</span>
+                            <h4 class="font-bold text-slate-800 text-lg mt-1">${t.titulo}</h4>
+                            <p class="text-xs text-slate-500">${t.descripcion || ''}</p>
+                            <p class="text-[10px] font-bold text-slate-400 mt-2">📅 ${t.fecha_entrega}</p>
+                        </div>
+                        <button onclick="borrarTarea('${t.id}')" class="text-slate-300 hover:text-red-500 p-2">🗑️</button>
+                    </div>`;
+            });
         }
 
+        async function borrarTarea(id) {
+            if(!confirm("¿Borrar?")) return;
+            await supabaseClient.from('tareas').delete().eq('id', id);
+            cargarTareas();
+        }
+
+        // Ejecución inicial
+        cargarMateriasEnSelect();
         cargarTareas();
     </script>
 </body>
