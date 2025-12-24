@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolDash - Acceso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black text-blue-600 tracking-tight">SchoolDash</h1>
+            <p class="text-slate-400 font-medium">Gestión Académica Profesional</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
+                <input id="email" type="email" placeholder="admin@escuela.com" 
+                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Contraseña</label>
+                <input id="password" type="password" placeholder="••••••••" 
+                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
+            </div>
+
+            <button onclick="intentarLogin()" id="btnEntrar"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200">
+                Entrar al Panel
+            </button>
+            
+            <div id="mensajeEstado" class="text-center p-3 rounded-lg text-sm font-bold hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const URL_PROYECTO = 'TU_URL_AQUÍ'; 
+        const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
+
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+
+        async function intentarLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnEntrar');
+            const mensaje = document.getElementById('mensajeEstado');
+
+            // Reset de UI
+            btn.innerText = "Cargando...";
+            btn.disabled = true;
+            mensaje.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+
+            try {
+                // 1. Auth de usuario
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) throw error;
+
+                // 2. Buscar Rol en la tabla 'perfiles'
+                const { data: perfil, error: errorPerfil } = await supabaseClient
+                    .from('perfiles')
+                    .select('rol')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (errorPerfil) throw new Error("Usuario sin perfil asignado.");
+
+                // 3. Éxito
+                mensaje.innerText = "¡Bienvenido! Rol: " + perfil.rol;
+                mensaje.classList.add('bg-green-100', 'text-green-700', 'block');
+                
+                setTimeout(() => {
+                    alert("Redirigiendo a panel de " + perfil.rol);
+                    // Aquí iría el cambio de página
+                }, 1000);
+
+            } catch (err) {
+                mensaje.innerText = err.message;
+                mensaje.classList.add('bg-red-100', 'text-red-700', 'block');
+                btn.innerText = "Entrar al Panel";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
