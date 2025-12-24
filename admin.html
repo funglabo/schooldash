@@ -25,7 +25,88 @@
                 </button>
             </div>
         </div>
+<div class="bg-white p-6 rounded-2xl shadow-sm mb-10 border-l-8 border-amber-500">
+    <h3 class="font-black text-slate-800 mb-4 uppercase text-xs tracking-widest">📢 Gestión de Avisos</h3>
+    
+    <div class="flex flex-col md:flex-row gap-4 mb-6">
+        <input id="nuevoAviso" type="text" placeholder="Escribe un nuevo aviso..." 
+               class="flex-1 border-2 border-slate-100 p-4 rounded-xl outline-none focus:border-amber-500 bg-slate-50 text-slate-700">
+        <button onclick="publicarAviso()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-amber-600 transition shadow-lg shadow-amber-200">
+            Publicar
+        </button>
+    </div>
 
+    <div class="border-t border-slate-100 pt-4">
+        <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Anuncios Activos (Los alumnos ven el más reciente)</h4>
+        <div id="listaAnuncios" class="space-y-2">
+            <p class="text-slate-400 text-sm italic">Cargando anuncios...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- NUEVAS FUNCIONES PARA ADMIN.HTML ---
+
+    // 1. Cargar y mostrar anuncios en el panel de admin
+    async function cargarAnunciosAdmin() {
+        const { data: anuncios, error } = await supabaseClient
+            .from('anuncios')
+            .select('*')
+            .order('creado_en', { ascending: false });
+
+        const contenedor = document.getElementById('listaAnuncios');
+        contenedor.innerHTML = '';
+
+        if (anuncios.length === 0) {
+            contenedor.innerHTML = '<p class="text-slate-400 text-sm italic">No hay anuncios publicados.</p>';
+            return;
+        }
+
+        anuncios.forEach(a => {
+            contenedor.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-sm text-slate-700 font-medium">${a.contenido}</span>
+                    <button onclick="borrarAviso('${a.id}')" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded-md text-xs font-bold transition">
+                        Eliminar
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    // 2. Función para borrar un anuncio
+    async function borrarAviso(id) {
+        if (!confirm("¿Seguro que quieres borrar este aviso? Los alumnos ya no lo verán.")) return;
+
+        const { error } = await supabaseClient
+            .from('anuncios')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert("Error al borrar: " + error.message);
+        } else {
+            cargarAnunciosAdmin(); // Refrescar la lista
+        }
+    }
+
+    // 3. Modificamos tu función de publicar para que refresque la lista
+    async function publicarAviso() {
+        const input = document.getElementById('nuevoAviso');
+        if (!input.value) return alert("Escribe un mensaje primero");
+
+        const { error } = await supabaseClient.from('anuncios').insert([{ contenido: input.value }]);
+        if (error) alert("Error: " + error.message);
+        else {
+            input.value = '';
+            cargarAnunciosAdmin(); // <--- Refrescar la lista automáticamente
+        }
+    }
+
+    // Al final del script, asegúrate de llamar a la función
+    cargarAnunciosAdmin();
+    cargarDashboard(); 
+</script>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Alumnos</h3>
