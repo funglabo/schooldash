@@ -3,96 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Panel | SchoolDash</title>
+    <title>Panel Estudiante | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
-
-    <nav class="bg-white border-b border-slate-200 p-4">
+    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">🎓</div>
-                <span class="font-bold text-slate-800 text-xl">SchoolDash</span>
+                <div class="bg-blue-600 p-2 rounded-xl text-white font-bold">🎓</div>
+                <span class="font-black text-slate-800 text-xl tracking-tight">SchoolDash</span>
             </div>
-            <button onclick="cerrarSesion()" class="text-slate-500 hover:text-red-600 font-medium transition">Cerrar Sesión</button>
+            <button onclick="cerrarSesion()" class="text-slate-400 hover:text-red-500 font-bold text-sm transition">Salir</button>
         </div>
     </nav>
 
-    <main class="container mx-auto mt-10 p-4">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl mb-8">
-            <h1 class="text-3xl font-bold">¡Hola, <span id="nombreAlumno">Cargando...</span>!</h1>
-            <p class="opacity-80 mt-2">Bienvenido a tu portal académico. Aquí podrás ver tus cursos y calificaciones.</p>
-        </div>
-<div id="contenedorAviso" class="hidden mb-8 bg-amber-50 border-2 border-amber-200 p-6 rounded-3xl flex items-start gap-4 animate-bounce-short">
-    <span class="text-3xl">📢</span>
-    <div>
-        <h4 class="font-bold text-amber-800">Aviso Importante:</h4>
-        <p id="textoAviso" class="text-amber-700 font-medium"></p>
-    </div>
-</div>
-
-<script>
-    // Añade esto al final de tu función cargarDatosEstudiante() en estudiante.html
-    async function cargarUltimoAviso() {
-        const { data, error } = await supabaseClient
-            .from('anuncios')
-            .select('contenido')
-            .order('creado_en', { ascending: false })
-            .limit(1)
-            .single();
-
-        if (data) {
-            document.getElementById('contenedorAviso').classList.remove('hidden');
-            document.getElementById('textoAviso').innerText = data.contenido;
-        }
-    }
-    
-    // No olvides llamar a la función al final del script
-    cargarUltimoAviso();
-</script>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 text-lg mb-4">Mis Calificaciones</h3>
-                <p class="text-slate-400 text-sm">No hay calificaciones registradas en este periodo.</p>
+    <main class="container mx-auto mt-8 p-4">
+        <div id="contenedorAviso" class="hidden mb-8 bg-amber-50 border-2 border-amber-100 p-6 rounded-3xl flex items-start gap-4 shadow-sm border-l-8 border-l-amber-400">
+            <span class="text-3xl">📢</span>
+            <div>
+                <h4 class="font-black text-amber-900 text-sm uppercase tracking-wider">Aviso de Dirección</h4>
+                <p id="textoAviso" class="text-amber-800 mt-1 font-medium italic"></p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 text-lg mb-4">Próximas Tareas</h3>
-                <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl text-slate-600 text-sm">
-                    <span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md font-bold">Próximamente</span>
-                    Configuración del perfil del estudiante.
-                </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-[2rem] p-10 text-white shadow-2xl shadow-blue-200 mb-10">
+            <h1 class="text-4xl font-black">¡Hola, <span id="nombreAlumno">...</span>!</h1>
+            <p class="opacity-80 mt-2 font-medium">Estás al día con tus actividades. Revisa tus cursos a continuación.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-4">📚</div>
+                <h3 class="font-bold text-slate-800 text-xl mb-2">Mis Cursos</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Próximamente podrás ver tus materias inscritas y el progreso de cada una.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-2xl mb-4">📝</div>
+                <h3 class="font-bold text-slate-800 text-xl mb-2">Calificaciones</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Las notas del primer parcial estarán disponibles al finalizar el mes.</p>
             </div>
         </div>
     </main>
 
     <script>
-        // --- CONFIGURACIÓN (Pon tus llaves aquí) ---
-        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
-        const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const URL_PROYECTO = 'TU_URL_AQUÍ'; 
+        const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        async function cargarDatosEstudiante() {
-            // 1. Obtener el usuario logueado actualmente
+        async function inicializarPanel() {
             const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return window.location.href = 'index.html';
 
-            if (!user) {
-                window.location.href = 'index.html'; // Si no hay sesión, volver al login
-                return;
-            }
+            // 1. Obtener nombre del perfil
+            const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
+            if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Buscar su nombre en la tabla 'perfiles'
-            const { data: perfil, error } = await supabaseClient
-                .from('perfiles')
-                .select('nombre_completo')
-                .eq('id', user.id)
-                .single();
-
-            if (error) {
-                console.error("Error al cargar perfil:", error);
-                document.getElementById('nombreAlumno').innerText = "Estudiante";
-            } else {
-                document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
+            // 2. Cargar último aviso
+            const { data: aviso } = await supabaseClient.from('anuncios').select('contenido').order('creado_en', { ascending: false }).limit(1).single();
+            if (aviso) {
+                document.getElementById('contenedorAviso').classList.remove('hidden');
+                document.getElementById('textoAviso').innerText = aviso.contenido;
             }
         }
 
@@ -101,8 +73,7 @@
             window.location.href = 'index.html';
         }
 
-        // Ejecutar al cargar la página
-        cargarDatosEstudiante();
+        inicializarPanel();
     </script>
 </body>
 </html>
