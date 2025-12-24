@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Materias | SchoolDash</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav class="bg-white border-b p-4">
+        <div class="container mx-auto flex items-center gap-4">
+            <a href="estudiante.html" class="text-blue-600 font-bold text-sm">← Volver al Panel</a>
+            <span class="text-slate-300">|</span>
+            <span class="font-black text-slate-800">Gestión de Materias</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4 max-w-4xl">
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">Inscribir Materias</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+                <input id="codMateria" type="text" placeholder="Código" class="p-3 rounded-xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500">
+                <input id="nomMateria" type="text" placeholder="Nombre" class="p-3 rounded-xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 md:col-span-1">
+                <input id="profMateria" type="text" placeholder="Profesor" class="p-3 rounded-xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500">
+                <button onclick="registrarMateria()" class="bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">Agregar</button>
+            </div>
+
+            <div id="listaMaterias" class="space-y-4">
+                </div>
+        </div>
+    </main>
+
+    <script>
+        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+      const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+
+        async function cargarMaterias() {
+            const { data: materias } = await supabaseClient.from('materias_alumno').select('*').order('creado_at', { ascending: false });
+            const contenedor = document.getElementById('listaMaterias');
+            contenedor.innerHTML = '';
+
+            if (!materias || materias.length === 0) {
+                contenedor.innerHTML = `<p class="text-center text-slate-400 py-10">No has registrado materias.</p>`;
+                return;
+            }
+
+            materias.forEach(m => {
+                contenedor.innerHTML += `
+                    <div class="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div>
+                            <span class="text-[10px] font-bold bg-white px-2 py-1 rounded border border-slate-200 text-slate-500 mr-2">${m.codigo_materia || 'S/C'}</span>
+                            <span class="font-bold text-slate-800">${m.nombre_materia}</span>
+                            <p class="text-xs text-slate-400 mt-1">Prof: ${m.profesor}</p>
+                        </div>
+                        <button onclick="borrarMateria('${m.id}')" class="text-red-500 font-bold text-xs hover:underline">Eliminar</button>
+                    </div>`;
+            });
+        }
+
+        async function registrarMateria() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { error } = await supabaseClient.from('materias_alumno').insert([{ 
+                alumno_id: user.id, 
+                codigo_materia: document.getElementById('codMateria').value,
+                nombre_materia: document.getElementById('nomMateria').value, 
+                profesor: document.getElementById('profMateria').value 
+            }]);
+            if (!error) {
+                document.getElementById('codMateria').value = '';
+                document.getElementById('nomMateria').value = '';
+                document.getElementById('profMateria').value = '';
+                cargarMaterias();
+            }
+        }
+
+        async function borrarMateria(id) {
+            await supabaseClient.from('materias_alumno').delete().eq('id', id);
+            cargarMaterias();
+        }
+
+        cargarMaterias();
+    </script>
+</body>
+</html>
