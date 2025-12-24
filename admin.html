@@ -60,7 +60,35 @@
                 console.error(error);
                 return;
             }
+<div class="bg-white p-6 rounded-xl shadow-sm mb-10 border-l-4 border-amber-500">
+    <h3 class="font-bold text-slate-800 mb-4 uppercase text-sm italic">📢 Publicar Aviso General</h3>
+    <div class="flex gap-4">
+        <input id="nuevoAviso" type="text" placeholder="Escribe un mensaje para los alumnos..." 
+               class="flex-1 border-2 border-slate-100 p-3 rounded-xl outline-none focus:border-amber-500 bg-slate-50">
+        <button onclick="publicarAviso()" class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-600 transition">
+            Publicar
+        </button>
+    </div>
+</div>
 
+<script>
+    // Añade esta función dentro de tu <script> en admin.html
+    async function publicarAviso() {
+        const contenido = document.getElementById('nuevoAviso').value;
+        if (!contenido) return;
+
+        const { error } = await supabaseClient
+            .from('anuncios')
+            .insert([{ contenido: contenido }]);
+
+        if (error) {
+            alert("Error al publicar: " + error.message);
+        } else {
+            alert("¡Aviso publicado exitosamente!");
+            document.getElementById('nuevoAviso').value = '';
+        }
+    }
+</script>
             const tabla = document.getElementById('tablaUsuarios');
             tabla.innerHTML = '';
 
