@@ -7,19 +7,25 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4">
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4 font-sans">
 
     <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-b-8 border-blue-600">
         <div class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight">SchoolDash</h1>
+            <h1 class="text-4xl font-black text-slate-800 tracking-tight">SchoolDash</h1>
             <p class="text-slate-400 font-medium">Gestión Académica</p>
         </div>
 
-        <div class="space-y-5">
-            <input id="email" type="email" placeholder="Correo" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700">
-            <input id="password" type="password" placeholder="Contraseña" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700">
+        <div class="space-y-5 text-left">
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+                <input id="email" type="email" placeholder="admin@escuela.com" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700 transition-all">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Contraseña</label>
+                <input id="password" type="password" placeholder="••••••••" class="w-full border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 bg-slate-50 text-slate-700 transition-all">
+            </div>
             
-            <button onclick="intentarLogin()" id="btnEntrar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95">
+            <button onclick="intentarLogin()" id="btnEntrar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 mt-2">
                 Entrar al Sistema
             </button>
             
@@ -28,10 +34,10 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURACIÓN ---
-        // PEGA TUS DATOS JUSTO AQUÍ DENTRO DE LAS COMILLAS
+        // --- CONFIGURACIÓN ---
+        // Coloca tus llaves aquí con mucho cuidado de mantener las comillas ''
         const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
-        const LLAVE_ANONIMA = 'sb_publishable_vWnlL0P83UxtZiBFBznC7A_yeuSNF4h';
+        const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
 
         async function intentarLogin() {
             const btn = document.getElementById('btnEntrar');
@@ -39,23 +45,24 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Validación de seguridad para la librería
+            // 1. COMPROBACIÓN TÉCNICA: ¿Ya cargó la librería?
             if (typeof supabase === 'undefined') {
-                alert("Error: La librería Supabase no ha cargado aún. Espera 2 segundos y reintenta.");
+                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-amber-50 text-amber-700";
+                mensaje.innerText = "La conexión está tardando... reintenta en 3 segundos.";
                 return;
             }
 
-            // Inicialización del cliente
+            // 2. INICIALIZACIÓN: Creamos el cliente justo ahora
             const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-            // Feedback visual
-            btn.innerText = "Verificando...";
+            // UI Feedback
+            btn.innerText = "Validando...";
             btn.disabled = true;
             mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-blue-50 text-blue-600";
-            mensaje.innerText = "Iniciando sesión...";
+            mensaje.innerText = "Conectando con la base de datos...";
 
             try {
-                // Paso 1: Autenticación
+                // Paso 1: Autenticación (Auth)
                 const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
@@ -63,25 +70,26 @@
 
                 if (authError) throw authError;
 
-                // Paso 2: Buscar el Rol del usuario
+                // Paso 2: Buscar el Rol en la tabla de perfiles
                 const { data: perfil, error: perfilError } = await supabaseClient
                     .from('perfiles')
                     .select('rol')
                     .eq('id', authData.user.id)
                     .single();
 
-                if (perfilError) throw new Error("Usuario correcto, pero no tiene perfil en la tabla 'perfiles'.");
+                if (perfilError) throw new Error("Acceso correcto, pero no tienes un rol asignado en la tabla 'perfiles'.");
 
                 // Paso 3: Éxito
                 mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-green-100 text-green-700";
                 mensaje.innerText = "¡Bienvenido, " + perfil.rol + "!";
                 
                 setTimeout(() => {
-                    alert("Acceso exitoso como: " + perfil.rol);
-                    // Aquí es donde en la próxima lección haremos el Dashboard
+                    alert("Has entrado como " + perfil.rol);
+                    // Aquí es donde crearemos el dashboard en el siguiente paso
                 }, 500);
 
             } catch (err) {
+                // Manejo de errores visual
                 mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-red-100 text-red-700";
                 mensaje.innerText = "Error: " + err.message;
                 btn.innerText = "Entrar al Sistema";
