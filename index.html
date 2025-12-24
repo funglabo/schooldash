@@ -3,89 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolDash - Acceso</title>
+    <title>SchoolDash | Gestión Académica</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen">
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-black text-blue-600 tracking-tight">SchoolDash</h1>
-            <p class="text-slate-400 font-medium">Gestión Académica Profesional</p>
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-b-8 border-blue-600 transition-all">
+        <div class="text-center mb-10">
+            <div class="inline-block p-3 bg-blue-50 rounded-2xl mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight">SchoolDash</h1>
+            <p class="text-slate-400 font-medium">Panel de Acceso Académico</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                <input id="email" type="email" placeholder="admin@escuela.com" 
-                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Correo Institucional</label>
+                <input id="email" type="email" placeholder="usuario@escuela.com" 
+                    class="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-slate-50 text-slate-700">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Contraseña</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Contraseña</label>
                 <input id="password" type="password" placeholder="••••••••" 
-                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
+                    class="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all bg-slate-50 text-slate-700">
             </div>
 
             <button onclick="intentarLogin()" id="btnEntrar"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200">
-                Entrar al Panel
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-200 active:scale-[0.98]">
+                Entrar al Sistema
             </button>
             
-            <div id="mensajeEstado" class="text-center p-3 rounded-lg text-sm font-bold hidden"></div>
+            <div id="mensajeEstado" class="text-center p-4 rounded-2xl text-sm font-semibold hidden animate-pulse"></div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-[10px] text-slate-300 uppercase font-bold">Gestión de Alumnos • Docentes • Administración</p>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        /** * 1. CONFIGURACIÓN INICIAL
+         * Reemplaza los valores de abajo con los de tu panel de Supabase
+         */
         const URL_PROYECTO = 'TU_URL_AQUÍ'; 
         const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
 
-        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+        // Inicialización segura del cliente
+        let supabaseClient;
+        try {
+            supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+        } catch (e) {
+            console.error("Error al configurar Supabase. Revisa las llaves.");
+        }
 
         async function intentarLogin() {
+            // Elementos de la interfaz
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const btn = document.getElementById('btnEntrar');
             const mensaje = document.getElementById('mensajeEstado');
 
-            // Reset de UI
-            btn.innerText = "Cargando...";
+            // Reset visual
+            btn.innerText = "Verificando credenciales...";
             btn.disabled = true;
-            mensaje.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-blue-50 text-blue-600";
+            mensaje.innerText = "Conectando con el servidor...";
 
             try {
-                // 1. Auth de usuario
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                // Paso 1: Autenticación básica
+                const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
 
-                if (error) throw error;
+                if (authError) throw authError;
 
-                // 2. Buscar Rol en la tabla 'perfiles'
-                const { data: perfil, error: errorPerfil } = await supabaseClient
+                // Paso 2: Búsqueda del Rol en la tabla 'perfiles'
+                const { data: perfil, error: perfilError } = await supabaseClient
                     .from('perfiles')
-                    .select('rol')
-                    .eq('id', data.user.id)
+                    .select('rol, nombre_completo')
+                    .eq('id', authData.user.id)
                     .single();
 
-                if (errorPerfil) throw new Error("Usuario sin perfil asignado.");
+                if (perfilError) {
+                    throw new Error("Usuario validado, pero no tiene perfil académico creado en la tabla 'perfiles'.");
+                }
 
-                // 3. Éxito
-                mensaje.innerText = "¡Bienvenido! Rol: " + perfil.rol;
-                mensaje.classList.add('bg-green-100', 'text-green-700', 'block');
+                // Paso 3: Éxito total
+                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-green-100 text-green-700";
+                mensaje.innerText = "¡Bienvenido/a, " + (perfil.nombre_completo || perfil.rol) + "!";
                 
+                // Efecto visual antes de pasar al siguiente apartado
                 setTimeout(() => {
-                    alert("Redirigiendo a panel de " + perfil.rol);
-                    // Aquí iría el cambio de página
-                }, 1000);
+                    alert("Acceso exitoso como: " + perfil.rol);
+                    // El siguiente paso será redirigir según el rol
+                    // window.location.href = perfil.rol + ".html";
+                }, 800);
 
             } catch (err) {
-                mensaje.innerText = err.message;
-                mensaje.classList.add('bg-red-100', 'text-red-700', 'block');
-                btn.innerText = "Entrar al Panel";
+                // Manejo de errores dinámico
+                mensaje.className = "text-center p-4 rounded-2xl text-sm font-semibold block bg-red-100 text-red-700";
+                mensaje.innerText = "Error: " + err.message;
+                btn.innerText = "Intentar de nuevo";
                 btn.disabled = false;
             }
         }
