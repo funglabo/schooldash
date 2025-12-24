@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Tareas | SchoolDash</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav class="bg-white border-b p-4">
+        <div class="container mx-auto flex items-center gap-4">
+            <a href="estudiante.html" class="bg-slate-100 p-2 rounded-lg text-blue-600 font-bold text-xs hover:bg-blue-50">← Dashboard</a>
+            <span class="font-black text-slate-800">Centro de Tareas</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4 max-w-4xl">
+        <div class="mb-10 text-center">
+            <h2 class="text-4xl font-black text-slate-800 tracking-tight">Tareas Asignadas</h2>
+            <p class="text-slate-400 mt-2">Revisa las actividades publicadas por tus profesores.</p>
+        </div>
+
+        <div id="listaTareas" class="grid grid-cols-1 gap-6">
+            <div class="animate-pulse bg-white h-32 rounded-3xl border border-slate-100"></div>
+        </div>
+    </main>
+
+    <script>
+        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+      const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+
+        async function cargarTareas() {
+            const { data: tareas, error } = await supabaseClient
+                .from('tareas')
+                .select('*')
+                .order('fecha_entrega', { ascending: true });
+
+            const contenedor = document.getElementById('listaTareas');
+            contenedor.innerHTML = '';
+
+            if (error || !tareas || tareas.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="bg-white p-12 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center">
+                        <p class="text-slate-400 font-medium italic">¡Felicidades! No hay tareas pendientes por ahora.</p>
+                    </div>`;
+                return;
+            }
+
+            tareas.forEach(t => {
+                contenedor.innerHTML += `
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="bg-amber-100 text-amber-700 text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider italic">Pendiente</span>
+                            </div>
+                            <h4 class="text-xl font-black text-slate-800">${t.titulo}</h4>
+                            <p class="text-slate-500 text-sm mt-1">${t.descripcion || 'Sin instrucciones adicionales.'}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center min-w-[140px]">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Fecha Límite</p>
+                            <p class="text-slate-800 font-black">${t.fecha_entrega}</p>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        cargarTareas();
+    </script>
+</body>
+</html>
