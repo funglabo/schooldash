@@ -2,180 +2,102 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Tareas | SchoolDash</title>
+    <title>Dashboard | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
-
-    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10 shadow-sm">
-        <div class="container mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a href="estudiante.html" class="bg-slate-100 hover:bg-blue-50 p-2 rounded-xl text-blue-600 font-bold text-xs transition-all">
-                    ← Dashboard
-                </a>
-                <span class="font-black text-slate-800 uppercase text-sm tracking-widest">Mi Agenda</span>
-            </div>
+    <nav class="bg-white border-b p-4 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <span class="font-black text-blue-600 text-xl tracking-tighter italic">SchoolDash</span>
+            <button onclick="cerrarSesion()" class="text-slate-400 font-bold text-sm hover:text-red-500 transition">Cerrar Sesión</button>
         </div>
     </nav>
 
-    <main class="container mx-auto mt-8 p-4 max-w-4xl">
-        
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
-            <h3 class="font-black text-slate-800 text-xl mb-6 flex items-center gap-2">
-                <span class="bg-blue-100 p-2 rounded-lg text-lg">📝</span> Nueva Tarea Personal
-            </h3>
+    <main class="container mx-auto mt-8 p-4 max-w-5xl">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">¡Hola, <span id="nombreAlumno">...</span>!</h1>
+                <p class="text-slate-500 font-medium">Este es el resumen de tu progreso académico.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="materias.html" class="bg-slate-100 text-slate-700 px-6 py-4 rounded-2xl font-bold hover:bg-slate-200 transition">Materias</a>
+                <a href="tareas.html" class="bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 text-center">Ir a mis Tareas</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Mis Materias</p>
+                <h2 id="totalMaterias" class="text-4xl font-black text-blue-600 mt-2">0</h2>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Título</label>
-                    <input id="tituloT" type="text" placeholder="¿Qué hay que hacer?" 
-                           class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Fecha Límite</label>
-                    <input id="fechaT" type="date" 
-                           class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                </div>
-                <div class="md:col-span-2 flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Detalles (Opcional)</label>
-                    <textarea id="descT" placeholder="Añade instrucciones o notas aquí..." 
-                              class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"></textarea>
-                </div>
-                <button onclick="crearTareaPropia()" 
-                        class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-                    + Agregar a mi lista
-                </button>
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm border-l-4 border-l-amber-400">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tareas Pendientes</p>
+                <h2 id="tareasPendientes" class="text-4xl font-black text-amber-500 mt-2">0</h2>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm border-l-4 border-l-emerald-400">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tareas Logradas</p>
+                <h2 id="tareasTerminadas" class="text-4xl font-black text-emerald-500 mt-2">0</h2>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Avisos Admin</p>
+                <h2 id="totalAvisos" class="text-4xl font-black text-slate-700 mt-2">0</h2>
             </div>
         </div>
-
-        <div class="flex items-center justify-between mb-6 px-4">
-            <h3 class="font-bold text-slate-400 uppercase text-xs tracking-widest">Lista de actividades</h3>
-            <div id="stats" class="text-[10px] font-bold text-slate-400">CARGANDO...</div>
-        </div>
-
-        <div id="listaTareas" class="grid grid-cols-1 gap-4">
-            </div>
     </main>
 
     <script>
-        // --- CONFIGURACIÓN DE SUPABASE ---
-        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        // --- CARGAR TAREAS ---
-        async function cargarTareas() {
+        async function cargarDashboard() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            const { data: tareas, error } = await supabaseClient
+            // 1. Nombre del Perfil
+            const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
+            if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
+
+            // 2. Conteo de Materias
+            const { count: cMaterias } = await supabaseClient
+                .from('materias_alumno')
+                .select('*', { count: 'exact', head: true })
+                .eq('alumno_id', user.id);
+            document.getElementById('totalMaterias').innerText = cMaterias || 0;
+
+            // 3. Conteo de Tareas PENDIENTES (terminada = false)
+            const { count: cPendientes } = await supabaseClient
                 .from('tareas')
-                .select('*')
+                .select('*', { count: 'exact', head: true })
                 .eq('alumno_id', user.id)
-                .order('terminada', { ascending: true }) // Pendientes primero
-                .order('fecha_entrega', { ascending: true });
+                .eq('terminada', false);
+            document.getElementById('tareasPendientes').innerText = cPendientes || 0;
 
-            const contenedor = document.getElementById('listaTareas');
-            const stats = document.getElementById('stats');
-            contenedor.innerHTML = '';
-
-            if (error) {
-                console.error(error);
-                return;
-            }
-
-            // Actualizar contador
-            const pendientes = tareas.filter(t => !t.terminada).length;
-            stats.innerText = `${pendientes} PENDIENTES / ${tareas.length} TOTAL`;
-
-            if (tareas.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-12 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center text-slate-400 italic">No tienes tareas registradas.</div>`;
-                return;
-            }
-
-            tareas.forEach(t => {
-                const esCompletada = t.terminada;
-                contenedor.innerHTML += `
-                    <div class="flex justify-between items-center p-6 rounded-[2rem] border transition-all duration-300 ${esCompletada ? 'bg-emerald-50 border-emerald-100 opacity-70' : 'bg-white border-slate-100 shadow-sm'}">
-                        <div class="flex items-center gap-5">
-                            <input type="checkbox" 
-                                   ${esCompletada ? 'checked' : ''} 
-                                   onchange="toggleTarea('${t.id}', ${esCompletada})"
-                                   class="w-6 h-6 rounded-full border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer transition-transform hover:scale-110">
-                            
-                            <div>
-                                <h4 class="font-bold ${esCompletada ? 'text-emerald-800 line-through' : 'text-slate-800'} text-lg leading-tight">
-                                    ${t.titulo}
-                                </h4>
-                                <p class="text-xs ${esCompletada ? 'text-emerald-600' : 'text-slate-500'} mt-1">
-                                    ${t.descripcion || 'Sin descripción'}
-                                </p>
-                                <div class="mt-2 flex items-center gap-2">
-                                    <span class="text-[10px] font-black uppercase tracking-tighter ${esCompletada ? 'text-emerald-400' : 'text-blue-500'}">
-                                        📅 Límite: ${t.fecha_entrega}
-                                    </span>
-                                    ${esCompletada ? '<span class="text-[10px] font-bold bg-emerald-200 text-emerald-700 px-2 py-0.5 rounded-full">TERMINADA</span>' : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="borrarTarea('${t.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>`;
-            });
-        }
-
-        // --- CREAR TAREA ---
-        async function crearTareaPropia() {
-            const titulo = document.getElementById('tituloT').value;
-            const fecha = document.getElementById('fechaT').value;
-            const desc = document.getElementById('descT').value;
-
-            if (!titulo || !fecha) return alert("Título y Fecha son obligatorios");
-
-            const { data: { user } } = await supabaseClient.auth.getUser();
-
-            const { error } = await supabaseClient.from('tareas').insert([{ 
-                alumno_id: user.id, 
-                titulo: titulo,
-                descripcion: desc,
-                fecha_entrega: fecha,
-                terminada: false
-            }]);
-
-            if (error) alert(error.message);
-            else {
-                document.getElementById('tituloT').value = '';
-                document.getElementById('fechaT').value = '';
-                document.getElementById('descT').value = '';
-                cargarTareas();
-            }
-        }
-
-        // --- CAMBIAR ESTADO (TERMINADA / PENDIENTE) ---
-        async function toggleTarea(id, estadoActual) {
-            const { error } = await supabaseClient
+            // 4. Conteo de Tareas TERMINADAS (terminada = true)
+            const { count: cTerminadas } = await supabaseClient
                 .from('tareas')
-                .update({ terminada: !estadoActual })
-                .eq('id', id);
+                .select('*', { count: 'exact', head: true })
+                .eq('alumno_id', user.id)
+                .eq('terminada', true);
+            document.getElementById('tareasTerminadas').innerText = cTerminadas || 0;
 
-            if (error) alert(error.message);
-            else cargarTareas();
+            // 5. Conteo de Avisos
+            const { count: cAvisos } = await supabaseClient
+                .from('anuncios')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalAvisos').innerText = cAvisos || 0;
         }
 
-        // --- BORRAR TAREA ---
-        async function borrarTarea(id) {
-            if(!confirm("¿Eliminar esta tarea de forma permanente?")) return;
-            const { error } = await supabaseClient.from('tareas').delete().eq('id', id);
-            if (!error) cargarTareas();
+        async function cerrarSesion() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
         }
 
-        cargarTareas();
+        cargarDashboard();
     </script>
 </body>
 </html>
