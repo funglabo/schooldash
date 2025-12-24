@@ -3,47 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduGestión - Acceso</title>
+    <title>SchoolDash - Acceso</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen font-sans">
+<body class="bg-slate-900 flex items-center justify-center min-h-screen">
 
-    <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-extrabold text-slate-800">EduGestión</h1>
-            <p class="text-slate-500 mt-2">Sistema de Gestión Académica</p>
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black text-blue-600 tracking-tight">SchoolDash</h1>
+            <p class="text-slate-400 font-medium">Gestión Académica Profesional</p>
         </div>
 
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-bold text-slate-700 mb-1">Correo Electrónico</label>
-                <input id="email" type="email" placeholder="nombre@escuela.com" 
-                    class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
+                <input id="email" type="email" placeholder="admin@escuela.com" 
+                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-slate-700 mb-1">Contraseña</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Contraseña</label>
                 <input id="password" type="password" placeholder="••••••••" 
-                    class="w-full border border-slate-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm">
+                    class="w-full border-2 border-slate-100 p-3 rounded-xl focus:border-blue-500 outline-none transition">
             </div>
 
             <button onclick="intentarLogin()" id="btnEntrar"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all transform active:scale-95 shadow-lg mt-4">
-                Entrar al Sistema
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200">
+                Entrar al Panel
             </button>
             
-            <p id="mensajeEstado" class="text-center text-sm mt-4 hidden"></p>
-        </div>
-
-        <div class="mt-8 text-center border-t pt-4">
-            <p class="text-xs text-slate-400 uppercase tracking-widest">Panel de Control Multiusuario</p>
+            <div id="mensajeEstado" class="text-center p-3 rounded-lg text-sm font-bold hidden"></div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DE TU BASE DE DATOS ---
-        // Reemplaza estos dos valores con los que copiaste de Supabase
+        // --- CONFIGURACIÓN ---
         const URL_PROYECTO = 'TU_URL_AQUÍ'; 
         const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
 
@@ -55,41 +50,43 @@
             const btn = document.getElementById('btnEntrar');
             const mensaje = document.getElementById('mensajeEstado');
 
-            // Feedback visual de carga
-            btn.innerText = "Verificando...";
+            // Reset de UI
+            btn.innerText = "Cargando...";
             btn.disabled = true;
-            mensaje.classList.remove('hidden', 'text-red-500', 'text-green-500');
-            mensaje.innerText = "Conectando con el servidor...";
+            mensaje.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
 
             try {
-                // Intentamos la autenticación
+                // 1. Auth de usuario
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
 
-                if (error) {
-                    mensaje.innerText = "Error: " + error.message;
-                    mensaje.classList.add('text-red-500', 'block');
-                    btn.innerText = "Entrar al Sistema";
-                    btn.disabled = false;
-                } else {
-                    mensaje.innerText = "¡Acceso concedido! Redirigiendo...";
-                    mensaje.classList.add('text-green-500', 'block');
-                    
-                    // Aquí es donde en el siguiente paso decidiremos si va a
-                    // la vista de Alumno, Profe o Admin
-                    console.log("Usuario logueado:", data.user);
-                    
-                    // Pequeña pausa para que se vea el éxito antes de "cambiar de página"
-                    setTimeout(() => {
-                        alert("Bienvenido " + data.user.email + "\nAhora vamos a construir el dashboard.");
-                    }, 500);
-                }
+                if (error) throw error;
+
+                // 2. Buscar Rol en la tabla 'perfiles'
+                const { data: perfil, error: errorPerfil } = await supabaseClient
+                    .from('perfiles')
+                    .select('rol')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (errorPerfil) throw new Error("Usuario sin perfil asignado.");
+
+                // 3. Éxito
+                mensaje.innerText = "¡Bienvenido! Rol: " + perfil.rol;
+                mensaje.classList.add('bg-green-100', 'text-green-700', 'block');
+                
+                setTimeout(() => {
+                    alert("Redirigiendo a panel de " + perfil.rol);
+                    // Aquí iría el cambio de página
+                }, 1000);
+
             } catch (err) {
-                alert("Ocurrió un error inesperado.");
+                mensaje.innerText = err.message;
+                mensaje.classList.add('bg-red-100', 'text-red-700', 'block');
+                btn.innerText = "Entrar al Panel";
                 btn.disabled = false;
-                btn.innerText = "Entrar al Sistema";
             }
         }
     </script>
