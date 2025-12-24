@@ -9,8 +9,8 @@
 <body class="bg-slate-50 min-h-screen">
     <nav class="bg-white border-b p-4 shadow-sm">
         <div class="container mx-auto flex justify-between items-center">
-            <span class="font-black text-blue-600 text-xl italic">SchoolDash</span>
-            <button onclick="cerrarSesion()" class="text-slate-400 font-bold text-sm">Cerrar Sesión</button>
+            <span class="font-black text-blue-600 text-xl italic tracking-tighter">SchoolDash</span>
+            <button onclick="cerrarSesion()" class="text-slate-400 font-bold text-sm hover:text-red-500 transition">Cerrar Sesión</button>
         </div>
     </nav>
 
@@ -18,54 +18,48 @@
         <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
                 <h1 class="text-3xl font-black text-slate-800">¡Hola, <span id="nombreAlumno">...</span>!</h1>
-                <p class="text-slate-500 font-medium">Resumen de tu agenda para hoy.</p>
+                <p class="text-slate-500 font-medium italic">Gestiona tus tareas directamente desde aquí.</p>
             </div>
             <div class="flex gap-3">
-                <a href="materias.html" class="bg-slate-100 text-slate-700 px-6 py-4 rounded-2xl font-bold hover:bg-slate-200 transition">Materias</a>
-                <a href="tareas.html" class="bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200">Ver Todas las Tareas</a>
+                <a href="materias.html" class="bg-slate-100 text-slate-700 px-6 py-4 rounded-2xl font-bold hover:bg-slate-200 transition text-sm">Materias</a>
+                <a href="tareas.html" class="bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition text-sm text-center">Ir a Agenda Completa</a>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
             <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Materias</p>
-                <h2 id="totalMaterias" class="text-3xl font-black text-blue-600 mt-1">0</h2>
+                <h2 id="totalMaterias" class="text-3xl font-black text-blue-600">0</h2>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Pendientes</p>
-                <h2 id="tareasPendientes" class="text-3xl font-black text-amber-500 mt-1">0</h2>
+                <h2 id="tareasPendientes" class="text-3xl font-black text-amber-500">0</h2>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Atrasadas</p>
-                <h2 id="totalAtrasadasCount" class="text-3xl font-black text-red-500 mt-1">0</h2>
+                <h2 id="totalAtrasadasCount" class="text-3xl font-black text-red-500">0</h2>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Logradas</p>
-                <h2 id="tareasTerminadas" class="text-3xl font-black text-emerald-500 mt-1">0</h2>
+                <h2 id="tareasTerminadas" class="text-3xl font-black text-emerald-500">0</h2>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="bg-red-50/50 p-8 rounded-[2.5rem] border border-red-100">
-                <h3 class="font-black text-red-800 text-xl mb-6 flex items-center gap-2">
-                    <span>⚠️</span> Tareas Atrasadas
-                </h3>
-                <div id="listaAtrasadas" class="space-y-4">
-                    </div>
+                <h3 class="font-black text-red-800 text-xl mb-6 flex items-center gap-2">⚠️ Atrasadas</h3>
+                <div id="listaAtrasadas" class="space-y-4"></div>
             </div>
 
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                <h3 class="font-black text-slate-800 text-xl mb-6 flex items-center gap-2">
-                    <span>📅</span> Próximos 7 días
-                </h3>
-                <div id="listaProximas" class="space-y-4">
-                    </div>
+                <h3 class="font-black text-slate-800 text-xl mb-6 flex items-center gap-2">📅 Próximos 7 días</h3>
+                <div id="listaProximas" class="space-y-4"></div>
             </div>
         </div>
     </main>
 
     <script>
-       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
@@ -73,82 +67,63 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            // 1. Perfil
             const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
             if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Traer TODAS las tareas pendientes del alumno para procesarlas
-            const { data: tareas } = await supabaseClient
-                .from('tareas')
-                .select('*')
-                .eq('alumno_id', user.id)
-                .eq('terminada', false);
+            const { data: tareas } = await supabaseClient.from('tareas').select('*').eq('alumno_id', user.id).eq('terminada', false);
 
-            const hoy = new Date();
-            hoy.setHours(0,0,0,0);
-            
-            const enSieteDias = new Date();
-            enSieteDias.setDate(hoy.getDate() + 7);
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const enSieteDias = new Date(); enSieteDias.setDate(hoy.getDate() + 7);
 
-            const atrasadas = [];
-            const proximas = [];
+            const atrasadas = []; const proximas = [];
 
             if (tareas) {
                 tareas.forEach(t => {
-                    const fechaTarea = new Date(t.fecha_entrega + "T00:00:00");
-                    
-                    if (fechaTarea < hoy) {
-                        atrasadas.push(t);
-                    } else if (fechaTarea <= enSieteDias) {
-                        proximas.push(t);
-                    }
+                    const fechaT = new Date(t.fecha_entrega + "T00:00:00");
+                    if (fechaT < hoy) atrasadas.push(t);
+                    else if (fechaT <= enSieteDias) proximas.push(t);
                 });
             }
 
-            // Actualizar contadores
             document.getElementById('tareasPendientes').innerText = tareas ? tareas.length : 0;
             document.getElementById('totalAtrasadasCount').innerText = atrasadas.length;
 
-            // Renderizar Atrasadas
-            const contAtrasadas = document.getElementById('listaAtrasadas');
-            contAtrasadas.innerHTML = atrasadas.length ? '' : '<p class="text-red-400 italic text-sm">No tienes tareas atrasadas. ¡Bien hecho!</p>';
-            atrasadas.forEach(t => {
-                contAtrasadas.innerHTML += `
-                    <div class="bg-white p-4 rounded-2xl border border-red-200 shadow-sm flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-red-700">${t.titulo}</h4>
-                            <p class="text-[10px] font-black text-red-400 uppercase">Venció el: ${t.fecha_entrega}</p>
-                        </div>
-                        <a href="tareas.html" class="text-red-500 text-xs font-bold hover:underline">Resolver</a>
-                    </div>`;
-            });
+            renderizarLista('listaAtrasadas', atrasadas, 'text-red-700', 'border-red-200');
+            renderizarLista('listaProximas', proximas, 'text-slate-800', 'border-slate-100 bg-slate-50');
 
-            // Renderizar Próximas
-            const contProximas = document.getElementById('listaProximas');
-            contProximas.innerHTML = proximas.length ? '' : '<p class="text-slate-400 italic text-sm">Semana tranquila, nada pendiente.</p>';
-            proximas.forEach(t => {
-                contProximas.innerHTML += `
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-slate-800">${t.titulo}</h4>
-                            <p class="text-[10px] font-bold text-blue-500 uppercase">Entrega: ${t.fecha_entrega}</p>
-                        </div>
-                        <span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-lg font-bold">Pronto</span>
-                    </div>`;
-            });
+            const { count: cMat } = await supabaseClient.from('materias_alumno').select('*', { count: 'exact', head: true }).eq('alumno_id', user.id);
+            document.getElementById('totalMaterias').innerText = cMat || 0;
 
-            // Otros conteos
-            const { count: cMaterias } = await supabaseClient.from('materias_alumno').select('*', { count: 'exact', head: true }).eq('alumno_id', user.id);
-            document.getElementById('totalMaterias').innerText = cMaterias || 0;
-
-            const { count: cTerminadas } = await supabaseClient.from('tareas').select('*', { count: 'exact', head: true }).eq('alumno_id', user.id).eq('terminada', true);
-            document.getElementById('tareasTerminadas').innerText = cTerminadas || 0;
+            const { count: cTer } = await supabaseClient.from('tareas').select('*', { count: 'exact', head: true }).eq('alumno_id', user.id).eq('terminada', true);
+            document.getElementById('tareasTerminadas').innerText = cTer || 0;
         }
 
-        async function cerrarSesion() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
+        function renderizarLista(idDiv, array, colorTitulo, bgCard) {
+            const cont = document.getElementById(idDiv);
+            cont.innerHTML = array.length ? '' : '<p class="text-slate-400 italic text-sm text-center py-4">Todo al día por aquí.</p>';
+            
+            array.forEach(t => {
+                cont.innerHTML += `
+                    <div class="${bgCard} p-4 rounded-2xl border flex justify-between items-center group transition-all hover:shadow-md">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" onchange="completarTareaRapido('${t.id}')" 
+                                   class="w-5 h-5 rounded-full border-slate-300 text-emerald-500 cursor-pointer">
+                            <div>
+                                <h4 class="font-bold ${colorTitulo} text-sm">${t.titulo}</h4>
+                                <p class="text-[10px] font-bold opacity-60 uppercase">${t.fecha_entrega}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
         }
+
+        async function completarTareaRapido(id) {
+            const { error } = await supabaseClient.from('tareas').update({ terminada: true }).eq('id', id);
+            if (!error) cargarDashboard(); // Recarga solo los datos para ver el cambio
+            else alert("Error: " + error.message);
+        }
+
+        async function cerrarSesion() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
 
         cargarDashboard();
     </script>
