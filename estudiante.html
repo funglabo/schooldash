@@ -6,66 +6,180 @@
     <title>Panel Estudiante | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-bounce-short { animation: bounce-short 2s infinite; }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
-    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10">
+
+    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10 shadow-sm">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="bg-blue-600 p-2 rounded-xl text-white font-bold">🎓</div>
+                <div class="bg-blue-600 p-2 rounded-xl text-white font-bold shadow-lg shadow-blue-200">🎓</div>
                 <span class="font-black text-slate-800 text-xl tracking-tight">SchoolDash</span>
             </div>
-            <button onclick="cerrarSesion()" class="text-slate-400 hover:text-red-500 font-bold text-sm transition">Salir</button>
+            <button onclick="cerrarSesion()" class="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors">Cerrar Sesión</button>
         </div>
     </nav>
 
-    <main class="container mx-auto mt-8 p-4">
-        <div id="contenedorAviso" class="hidden mb-8 bg-amber-50 border-2 border-amber-100 p-6 rounded-3xl flex items-start gap-4 shadow-sm border-l-8 border-l-amber-400">
+    <main class="container mx-auto mt-8 p-4 max-w-5xl">
+        
+        <div id="contenedorAviso" class="hidden mb-8 bg-amber-50 border-2 border-amber-100 p-6 rounded-3xl flex items-start gap-4 shadow-sm border-l-8 border-l-amber-400 animate-bounce-short">
             <span class="text-3xl">📢</span>
             <div>
-                <h4 class="font-black text-amber-900 text-sm uppercase tracking-wider">Aviso de Dirección</h4>
+                <h4 class="font-black text-amber-900 text-xs uppercase tracking-widest">Aviso de la Institución</h4>
                 <p id="textoAviso" class="text-amber-800 mt-1 font-medium italic"></p>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-[2rem] p-10 text-white shadow-2xl shadow-blue-200 mb-10">
-            <h1 class="text-4xl font-black">¡Hola, <span id="nombreAlumno">...</span>!</h1>
-            <p class="opacity-80 mt-2 font-medium">Estás al día con tus actividades. Revisa tus cursos a continuación.</p>
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-200 mb-10">
+            <h1 class="text-4xl font-black">¡Hola, <span id="nombreAlumno">Estudiante</span>!</h1>
+            <p class="opacity-80 mt-2 font-medium">Bienvenido a tu panel personal. Aquí puedes gestionar tu semestre.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-4">📚</div>
-                <h3 class="font-bold text-slate-800 text-xl mb-2">Mis Cursos</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">Próximamente podrás ver tus materias inscritas y el progreso de cada una.</p>
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 mb-8">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="font-black text-slate-800 text-2xl tracking-tight">Mis Materias</h3>
+                    <p class="text-slate-400 text-sm">Registra y organiza tus cursos actuales.</p>
+                </div>
+                <div class="bg-blue-50 text-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">📚</div>
             </div>
 
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-2xl mb-4">📝</div>
-                <h3 class="font-bold text-slate-800 text-xl mb-2">Calificaciones</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">Las notas del primer parcial estarán disponibles al finalizar el mes.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Materia</label>
+                    <input id="nomMateria" type="text" placeholder="Ej: Matemáticas" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Profesor</label>
+                    <input id="profMateria" type="text" placeholder="Ej: Dr. García" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="registrarMateria()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                        + Agregar Materia
+                    </button>
+                </div>
+            </div>
+
+            <div id="listaMaterias" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-slate-400 text-sm italic col-span-2 text-center py-10">Cargando tus materias...</p>
             </div>
         </div>
+
     </main>
 
     <script>
-        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+        // --- CONFIGURACIÓN DE SUPABASE ---
+       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
+        // --- FUNCIÓN PRINCIPAL DE INICIO ---
         async function inicializarPanel() {
+            // Verificar sesión
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            // 1. Obtener nombre del perfil
-            const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
+            // 1. Cargar Nombre del Perfil
+            const { data: perfil } = await supabaseClient
+                .from('perfiles')
+                .select('nombre_completo')
+                .eq('id', user.id)
+                .single();
+            
             if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Cargar último aviso
-            const { data: aviso } = await supabaseClient.from('anuncios').select('contenido').order('creado_en', { ascending: false }).limit(1).single();
+            // 2. Cargar Último Aviso del Admin
+            const { data: aviso } = await supabaseClient
+                .from('anuncios')
+                .select('contenido')
+                .order('creado_at', { ascending: false })
+                .limit(1)
+                .single();
+
             if (aviso) {
                 document.getElementById('contenedorAviso').classList.remove('hidden');
                 document.getElementById('textoAviso').innerText = aviso.contenido;
             }
+
+            // 3. Cargar Materias
+            cargarMaterias();
+        }
+
+        // --- GESTIÓN DE MATERIAS ---
+
+        async function registrarMateria() {
+            const nombre = document.getElementById('nomMateria').value;
+            const profe = document.getElementById('profMateria').value;
+
+            if (!nombre) return alert("Por favor, escribe el nombre de la materia");
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            const { error } = await supabaseClient.from('materias_alumno').insert([
+                { 
+                    alumno_id: user.id, 
+                    nombre_materia: nombre, 
+                    profesor: profe 
+                }
+            ]);
+
+            if (error) {
+                alert("Error al registrar: " + error.message);
+            } else {
+                document.getElementById('nomMateria').value = '';
+                document.getElementById('profMateria').value = '';
+                cargarMaterias(); // Recargar lista
+            }
+        }
+
+        async function cargarMaterias() {
+            const { data: materias, error } = await supabaseClient
+                .from('materias_alumno')
+                .select('*')
+                .order('creado_at', { ascending: false });
+
+            const contenedor = document.getElementById('listaMaterias');
+            contenedor.innerHTML = '';
+
+            if (error || !materias || materias.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="col-span-2 py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                        <p class="text-slate-400 text-sm font-medium">Aún no has registrado ninguna materia.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            materias.forEach(m => {
+                contenedor.innerHTML += `
+                    <div class="flex justify-between items-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-blue-50 text-blue-500 p-2 rounded-lg text-xs font-bold">DOC</div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">${m.nombre_materia}</h4>
+                                <p class="text-[11px] text-slate-500 font-medium">👨‍🏫 Prof. ${m.profesor || 'No especificado'}</p>
+                            </div>
+                        </div>
+                        <button onclick="borrarMateria('${m.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function borrarMateria(id) {
+            if(!confirm("¿Deseas eliminar esta materia de tu lista?")) return;
+            const { error } = await supabaseClient.from('materias_alumno').delete().eq('id', id);
+            if (!error) cargarMaterias();
         }
 
         async function cerrarSesion() {
@@ -73,6 +187,7 @@
             window.location.href = 'index.html';
         }
 
+        // Ejecutar al cargar
         inicializarPanel();
     </script>
 </body>
