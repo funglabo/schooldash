@@ -1,82 +1,30 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Sistema Académico</title>
+    <title>Login Académico</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-gray-100">
-    <div id="root"></div>
+<body class="bg-blue-50 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded shadow-md">
+        <h1 class="text-2xl font-bold mb-4">Iniciar Sesión</h1>
+        <input id="email" type="email" placeholder="Correo" class="border p-2 w-full mb-2">
+        <input id="password" type="password" placeholder="Contraseña" class="border p-2 w-full mb-4">
+        <button onclick="conectar()" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Probar Conexión</button>
+    </div>
 
-    <script type="text/babel">
-        const { useState } = React;
+    <script>
+        // ESTO ES LO QUE VAMOS A RELLENAR AHORA
+        const URL_PROYECTO = https://supabase.com/dashboard/project/iobxbwwabjhulvukdtec/settings/api-keys/legacy;
+        const LLAVE_ANONIMA = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE;
 
-        function Login() {
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [loading, setLoading] = useState(false);
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-            const handleLogin = (e) => {
-                e.preventDefault();
-                setLoading(true);
-                
-                // Aquí conectaremos con Supabase más adelante
-                console.log("Intentando iniciar sesión con:", email);
-                
-                setTimeout(() => {
-                    alert("Conexión pendiente: Necesitamos las llaves de API de Supabase");
-                    setLoading(false);
-                }, 1000);
-            };
-
-            return (
-                <div class="min-h-screen flex items-center justify-center">
-                    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-                        <div class="text-center mb-8">
-                            <h2 class="text-3xl font-bold text-blue-600">EduGestión</h2>
-                            <p class="text-gray-500">Gestión Académica</p>
-                        </div>
-                        <form onSubmit={handleLogin}>
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
-                                <input 
-                                    type="email" 
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="usuario@escuela.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-                                <input 
-                                    type="password" 
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <button 
-                                type="submit" 
-                                disabled={loading}
-                                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
-                            >
-                                {loading ? 'Cargando...' : 'Entrar al Dashboard'}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            );
+        async function conectar() {
+            const email = document.getElementById('email').value;
+            alert("Intentando conectar con Supabase...");
+            // Aquí comprobaremos si funciona
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<Login />);
     </script>
 </body>
 </html>
