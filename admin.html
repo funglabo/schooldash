@@ -9,102 +9,91 @@
 <body class="bg-slate-50">
     <nav class="bg-blue-600 p-4 text-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">SchoolDash Admin</h1>
-            <button onclick="cerrarSesion()" class="bg-blue-700 px-4 py-2 rounded-lg hover:bg-blue-800 transition">Cerrar Sesión</button>
+            <h1 class="text-xl font-bold italic text-white">SchoolDash Admin</h1>
+            <button onclick="cerrarSesion()" class="bg-blue-700 px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm font-bold">Cerrar Sesión</button>
         </div>
     </nav>
 
     <div class="container mx-auto mt-10 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
-                <h3 class="text-slate-400 text-sm font-bold uppercase">Total Alumnos</h3>
-                <p id="countAlumnos" class="text-3xl font-black text-slate-800">Cargando...</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
-                <h3 class="text-slate-400 text-sm font-bold uppercase">Docentes Activos</h3>
-                <p id="countProfes" class="text-3xl font-black text-slate-800">Cargando...</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm mb-10 border-l-8 border-amber-500">
+            <h3 class="font-black text-slate-800 mb-4 uppercase text-xs tracking-widest">📢 Publicar Aviso a Estudiantes</h3>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input id="nuevoAviso" type="text" placeholder="Ej: Mañana la clase será por Zoom..." 
+                       class="flex-1 border-2 border-slate-100 p-4 rounded-xl outline-none focus:border-amber-500 bg-slate-50 text-slate-700">
+                <button onclick="publicarAviso()" class="bg-amber-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-amber-600 transition shadow-lg shadow-amber-200">
+                    Publicar Ahora
+                </button>
             </div>
         </div>
 
-        <div class="mt-10 bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h2 class="text-lg font-bold text-slate-800">Lista de Usuarios Registrados</h2>
-                <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold">+ Nuevo Usuario</button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Alumnos</h3>
+                <p id="countAlumnos" class="text-4xl font-black text-slate-800">...</p>
             </div>
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
-                    <tr>
-                        <th class="p-4">Nombre</th>
-                        <th class="p-4">Rol</th>
-                        <th class="p-4">Estado</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaUsuarios" class="text-slate-700">
-                    </tbody>
-            </table>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-green-500">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Docentes</h3>
+                <p id="countProfes" class="text-4xl font-black text-slate-800">...</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+            <div class="p-6 bg-slate-50 border-b border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800">Comunidad Educativa</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase">
+                        <tr>
+                            <th class="p-5 font-bold">Nombre Completo</th>
+                            <th class="p-5 font-bold">Rol</th>
+                            <th class="p-5 font-bold">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaUsuarios" class="text-slate-700 divide-y divide-slate-50">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
-        const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const URL_PROYECTO = 'TU_URL_AQUÍ'; 
+        const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        async function cargarDatos() {
-            // 1. Traer todos los perfiles de la base de datos
-            const { data: usuarios, error } = await supabaseClient
-                .from('perfiles')
-                .select('*');
+        async function cargarDashboard() {
+            const { data: usuarios, error } = await supabaseClient.from('perfiles').select('*');
+            if (error) return console.error(error);
 
-            if (error) {
-                console.error(error);
-                return;
-            }
-<div class="bg-white p-6 rounded-xl shadow-sm mb-10 border-l-4 border-amber-500">
-    <h3 class="font-bold text-slate-800 mb-4 uppercase text-sm italic">📢 Publicar Aviso General</h3>
-    <div class="flex gap-4">
-        <input id="nuevoAviso" type="text" placeholder="Escribe un mensaje para los alumnos..." 
-               class="flex-1 border-2 border-slate-100 p-3 rounded-xl outline-none focus:border-amber-500 bg-slate-50">
-        <button onclick="publicarAviso()" class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-600 transition">
-            Publicar
-        </button>
-    </div>
-</div>
-
-<script>
-    // Añade esta función dentro de tu <script> en admin.html
-    async function publicarAviso() {
-        const contenido = document.getElementById('nuevoAviso').value;
-        if (!contenido) return;
-
-        const { error } = await supabaseClient
-            .from('anuncios')
-            .insert([{ contenido: contenido }]);
-
-        if (error) {
-            alert("Error al publicar: " + error.message);
-        } else {
-            alert("¡Aviso publicado exitosamente!");
-            document.getElementById('nuevoAviso').value = '';
-        }
-    }
-</script>
             const tabla = document.getElementById('tablaUsuarios');
             tabla.innerHTML = '';
 
             usuarios.forEach(u => {
+                const colorRol = u.rol === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
                 tabla.innerHTML += `
-                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                        <td class="p-4 font-medium">${u.nombre_completo}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${u.rol === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${u.rol}</span></td>
-                        <td class="p-4 text-green-500 text-sm italic underline">Activo</td>
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-5 font-semibold text-slate-800">${u.nombre_completo}</td>
+                        <td class="p-5"><span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${colorRol}">${u.rol}</span></td>
+                        <td class="p-5 text-green-500 font-medium text-sm">● Activo</td>
                     </tr>
                 `;
             });
 
-            // Actualizar contadores
             document.getElementById('countAlumnos').innerText = usuarios.filter(u => u.rol === 'estudiante').length;
             document.getElementById('countProfes').innerText = usuarios.filter(u => u.rol === 'docente').length;
+        }
+
+        async function publicarAviso() {
+            const input = document.getElementById('nuevoAviso');
+            if (!input.value) return alert("Escribe un mensaje primero");
+
+            const { error } = await supabaseClient.from('anuncios').insert([{ contenido: input.value }]);
+            if (error) alert("Error: " + error.message);
+            else {
+                alert("Aviso publicado");
+                input.value = '';
+            }
         }
 
         async function cerrarSesion() {
@@ -112,7 +101,7 @@
             window.location.href = 'index.html';
         }
 
-        cargarDatos();
+        cargarDashboard();
     </script>
 </body>
 </html>
