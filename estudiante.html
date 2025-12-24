@@ -38,82 +38,80 @@
 
         <div class="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-200 mb-10">
             <h1 class="text-4xl font-black">¡Hola, <span id="nombreAlumno">Estudiante</span>!</h1>
-            <p class="opacity-80 mt-2 font-medium">Bienvenido a tu panel personal. Gestiona tus materias aquí.</p>
+            <p class="opacity-80 mt-2 font-medium">Gestiona tus materias y códigos académicos aquí.</p>
         </div>
 
         <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 mb-8">
             <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h3 class="font-black text-slate-800 text-2xl tracking-tight">Mis Materias</h3>
-                    <p class="text-slate-400 text-sm">Registra y organiza tus cursos actuales.</p>
-                </div>
-                <div class="bg-blue-50 text-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">📚</div>
+                <h3 class="font-black text-slate-800 text-2xl tracking-tight">Mis Materias</h3>
+                <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl">📚</div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200">
                 <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Materia</label>
-                    <input id="nomMateria" type="text" placeholder="Ej: Programación" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Código</label>
+                    <input id="codMateria" type="text" placeholder="Ej: MAT-101" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                </div>
+                <div class="flex flex-col gap-1 md:col-span-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Nombre Materia</label>
+                    <input id="nomMateria" type="text" placeholder="Ej: Álgebra" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Profesor</label>
-                    <input id="profMateria" type="text" placeholder="Ej: Ing. Pérez" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                    <input id="profMateria" type="text" placeholder="Ej: Ing. Ruiz" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
                 </div>
                 <div class="flex items-end">
                     <button onclick="registrarMateria()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-                        + Agregar
+                        + Registrar
                     </button>
                 </div>
             </div>
 
-            <div id="listaMaterias" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-slate-400 text-sm italic col-span-2 text-center py-10">Cargando tus materias...</p>
+            <div id="listaMaterias" class="grid grid-cols-1 gap-4">
+                <p class="text-slate-400 text-sm italic text-center py-10">Cargando...</p>
             </div>
         </div>
-
     </main>
 
     <script>
-        // --- CONFIGURACIÓN DE SUPABASE ---
-       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
-      const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const URL_PROYECTO = 'TU_URL_AQUÍ'; 
+        const LLAVE_ANONIMA = 'TU_LLAVE_ANONIMA_AQUÍ';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        // --- INICIO ---
         async function inicializarPanel() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            // 1. Cargar Nombre
             const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
             if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Cargar Aviso
             const { data: aviso } = await supabaseClient.from('anuncios').select('contenido').order('creado_at', { ascending: false }).limit(1).single();
             if (aviso) {
                 document.getElementById('contenedorAviso').classList.remove('hidden');
                 document.getElementById('textoAviso').innerText = aviso.contenido;
             }
 
-            // 3. Cargar Materias
             cargarMaterias();
         }
 
-        // --- FUNCIONES MATERIAS ---
         async function registrarMateria() {
+            const codigo = document.getElementById('codMateria').value;
             const nombre = document.getElementById('nomMateria').value;
             const profe = document.getElementById('profMateria').value;
-            if (!nombre) return alert("Escribe el nombre de la materia");
+
+            if (!nombre || !codigo) return alert("Código y Nombre son obligatorios");
 
             const { data: { user } } = await supabaseClient.auth.getUser();
             const { error } = await supabaseClient.from('materias_alumno').insert([{ 
                 alumno_id: user.id, 
+                codigo_materia: codigo,
                 nombre_materia: nombre, 
                 profesor: profe 
             }]);
 
             if (error) alert(error.message);
             else {
+                document.getElementById('codMateria').value = '';
                 document.getElementById('nomMateria').value = '';
                 document.getElementById('profMateria').value = '';
                 cargarMaterias();
@@ -126,22 +124,24 @@
             contenedor.innerHTML = '';
 
             if (error || !materias || materias.length === 0) {
-                contenedor.innerHTML = `<div class="col-span-2 py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">No tienes materias registradas.</div>`;
+                contenedor.innerHTML = `<div class="py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">No hay materias registradas.</div>`;
                 return;
             }
 
             materias.forEach(m => {
                 contenedor.innerHTML += `
                     <div class="flex justify-between items-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-blue-100 text-blue-600 p-3 rounded-xl text-xl">📚</div>
+                        <div class="flex items-center gap-6">
+                            <div class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-mono text-xs font-bold border border-slate-200">
+                                ${m.codigo_materia || 'S/C'}
+                            </div>
                             <div>
-                                <h4 class="font-bold text-slate-800">${m.nombre_materia}</h4>
-                                <p class="text-[11px] text-slate-500 font-medium">PROF: ${m.profesor || 'Pendiente'}</p>
+                                <h4 class="font-bold text-slate-800 text-lg">${m.nombre_materia}</h4>
+                                <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Profesor: ${m.profesor || 'Pendiente'}</p>
                             </div>
                         </div>
                         <button onclick="borrarMateria('${m.id}')" 
-                            class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                            class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-5 py-2 rounded-xl text-xs font-bold transition-all">
                             Eliminar
                         </button>
                     </div>`;
@@ -149,7 +149,7 @@
         }
 
         async function borrarMateria(id) {
-            if(!confirm("¿Deseas eliminar esta materia?")) return;
+            if(!confirm("¿Eliminar materia?")) return;
             const { error } = await supabaseClient.from('materias_alumno').delete().eq('id', id);
             if (error) alert(error.message);
             else cargarMaterias();
