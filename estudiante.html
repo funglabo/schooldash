@@ -24,7 +24,33 @@
             <h1 class="text-3xl font-bold">¡Hola, <span id="nombreAlumno">Cargando...</span>!</h1>
             <p class="opacity-80 mt-2">Bienvenido a tu portal académico. Aquí podrás ver tus cursos y calificaciones.</p>
         </div>
+<div id="contenedorAviso" class="hidden mb-8 bg-amber-50 border-2 border-amber-200 p-6 rounded-3xl flex items-start gap-4 animate-bounce-short">
+    <span class="text-3xl">📢</span>
+    <div>
+        <h4 class="font-bold text-amber-800">Aviso Importante:</h4>
+        <p id="textoAviso" class="text-amber-700 font-medium"></p>
+    </div>
+</div>
 
+<script>
+    // Añade esto al final de tu función cargarDatosEstudiante() en estudiante.html
+    async function cargarUltimoAviso() {
+        const { data, error } = await supabaseClient
+            .from('anuncios')
+            .select('contenido')
+            .order('creado_en', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (data) {
+            document.getElementById('contenedorAviso').classList.remove('hidden');
+            document.getElementById('textoAviso').innerText = data.contenido;
+        }
+    }
+    
+    // No olvides llamar a la función al final del script
+    cargarUltimoAviso();
+</script>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <h3 class="font-bold text-slate-800 text-lg mb-4">Mis Calificaciones</h3>
