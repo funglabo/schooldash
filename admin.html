@@ -39,18 +39,37 @@
 
     // 1. Cargar y mostrar anuncios en el panel de admin
     async function cargarAnunciosAdmin() {
-        const { data: anuncios, error } = await supabaseClient
-            .from('anuncios')
-            .select('*')
-            .order('creado_en', { ascending: false });
+    const { data: anuncios, error } = await supabaseClient
+        .from('anuncios')
+        .select('*')
+        .order('creado_en', { ascending: false }); // <-- Verifica que en tu tabla se llame 'creado_en'
 
-        const contenedor = document.getElementById('listaAnuncios');
-        contenedor.innerHTML = '';
+    if (error) {
+        console.error("Error de Supabase:", error);
+        return;
+    }
 
-        if (anuncios.length === 0) {
-            contenedor.innerHTML = '<p class="text-slate-400 text-sm italic">No hay anuncios publicados.</p>';
-            return;
-        }
+    console.log("Anuncios encontrados:", anuncios); // Esto te dirá en la consola si llegaron datos
+
+    const contenedor = document.getElementById('listaAnuncios');
+    contenedor.innerHTML = '';
+
+    if (!anuncios || anuncios.length === 0) {
+        contenedor.innerHTML = '<p class="text-slate-400 text-sm italic">No hay anuncios activos.</p>';
+        return;
+    }
+
+    anuncios.forEach(a => {
+        contenedor.innerHTML += `
+            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100 mb-2">
+                <span class="text-sm text-slate-700 font-medium">${a.contenido}</span>
+                <button onclick="borrarAviso('${a.id}')" class="text-red-500 hover:bg-red-100 px-3 py-1 rounded-md text-xs font-bold transition">
+                    Eliminar
+                </button>
+            </div>
+        `;
+    });
+}
 
         anuncios.forEach(a => {
             contenedor.innerHTML += `
