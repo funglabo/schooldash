@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Sistema Académico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function Login() {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                setLoading(true);
+                
+                // Aquí conectaremos con Supabase más adelante
+                console.log("Intentando iniciar sesión con:", email);
+                
+                setTimeout(() => {
+                    alert("Conexión pendiente: Necesitamos las llaves de API de Supabase");
+                    setLoading(false);
+                }, 1000);
+            };
+
+            return (
+                <div class="min-h-screen flex items-center justify-center">
+                    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-blue-600">EduGestión</h2>
+                            <p class="text-gray-500">Gestión Académica</p>
+                        </div>
+                        <form onSubmit={handleLogin}>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Correo Institucional</label>
+                                <input 
+                                    type="email" 
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="usuario@escuela.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+                                <input 
+                                    type="password" 
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                            >
+                                {loading ? 'Cargando...' : 'Entrar al Dashboard'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Login />);
+    </script>
+</body>
+</html>
