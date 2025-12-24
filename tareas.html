@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Tareas | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,39 +12,51 @@
     <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-10 shadow-sm">
         <div class="container mx-auto flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="estudiante.html" class="bg-slate-100 p-2 rounded-xl text-blue-600 font-bold text-xs hover:bg-blue-50 transition">← Dashboard</a>
+                <a href="estudiante.html" class="bg-slate-100 hover:bg-blue-50 p-2 rounded-xl text-blue-600 font-bold text-xs transition-all">← Dashboard</a>
                 <span class="font-black text-slate-800 uppercase text-sm tracking-widest">Agenda Académica</span>
             </div>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-4 max-w-4xl">
+        
         <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10">
             <h3 class="font-black text-slate-800 text-xl mb-6">📝 Nueva Tarea</h3>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Vincular Materia</label>
                     <select id="selectMateria" class="w-full p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none mt-1"></select>
                 </div>
-                <input id="tituloT" type="text" placeholder="¿Qué hay que hacer?" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <input id="fechaT" type="date" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <textarea id="descT" placeholder="Detalles adicionales..." class="md:col-span-2 p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"></textarea>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Título de la tarea</label>
+                    <input id="tituloT" type="text" placeholder="¿Qué hay que hacer?" class="w-full p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Fecha de entrega</label>
+                    <input id="fechaT" type="date" class="w-full p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none mt-1">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Detalles</label>
+                    <textarea id="descT" placeholder="Escribe aquí las instrucciones..." class="w-full p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none mt-1"></textarea>
+                </div>
                 <button onclick="crearTareaPropia()" class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">+ Guardar Tarea</button>
             </div>
         </div>
 
-        <div id="listaTareas" class="grid grid-cols-1 gap-4"></div>
+        <div id="listaTareas" class="grid grid-cols-1 gap-4 pb-20">
+            </div>
     </main>
 
     <div id="modalEditar" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl scale-95 transition-all">
-            <h3 class="font-black text-2xl text-slate-800 mb-6 italic">Modificar Tarea</h3>
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 class="font-black text-2xl text-slate-800 mb-6 italic text-center">Modificar Tarea</h3>
             <input type="hidden" id="editId">
             <div class="space-y-4">
-                <select id="editMateria" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-blue-500"></select>
-                <input id="editTitulo" type="text" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
-                <input id="editFecha" type="date" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
-                <textarea id="editDesc" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"></textarea>
+                <select id="editMateria" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none"></select>
+                <input id="editTitulo" type="text" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none">
+                <input id="editFecha" type="date" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none">
+                <textarea id="editDesc" class="w-full p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 outline-none h-24 resize-none"></textarea>
                 <div class="flex gap-3 pt-4">
                     <button onclick="cerrarModal()" class="flex-1 bg-slate-100 text-slate-500 font-bold py-4 rounded-2xl">Cancelar</button>
                     <button onclick="guardarCambios()" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-100">Actualizar</button>
@@ -53,55 +66,102 @@
     </div>
 
     <script>
-        cconst URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+        // --- CONFIGURACIÓN ---
+       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
+        // 1. CARGAR MATERIAS EN LOS SELECTS
         async function cargarMaterias() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data: materias } = await supabaseClient.from('materias_alumno').select('nombre_materia').eq('alumno_id', user.id);
-            const selectCrear = document.getElementById('selectMateria');
-            const selectEdit = document.getElementById('editMateria');
+            const { data: materias } = await supabaseClient
+                .from('materias_alumno')
+                .select('nombre_materia')
+                .eq('alumno_id', user.id);
+
+            const sCrear = document.getElementById('selectMateria');
+            const sEdit = document.getElementById('editMateria');
             
-            const opciones = materias.map(m => `<option value="${m.nombre_materia}">${m.nombre_materia}</option>`).join('');
-            const placeholder = '<option value="">-- Selecciona Materia --</option>';
+            let opciones = '<option value="">-- Sin Materia / General --</option>';
+            if (materias && materias.length > 0) {
+                opciones += materias.map(m => `<option value="${m.nombre_materia}">${m.nombre_materia}</option>`).join('');
+            }
             
-            selectCrear.innerHTML = placeholder + opciones;
-            selectEdit.innerHTML = placeholder + opciones;
+            sCrear.innerHTML = opciones;
+            sEdit.innerHTML = opciones;
         }
 
+        // 2. CARGAR TAREAS (CORREGIDO)
         async function cargarTareas() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data: tareas } = await supabaseClient.from('tareas').select('*').eq('alumno_id', user.id).order('fecha_entrega', { ascending: true });
-            
+            const { data: tareas, error } = await supabaseClient
+                .from('tareas')
+                .select('*')
+                .eq('alumno_id', user.id)
+                .order('fecha_entrega', { ascending: true });
+
+            if (error) {
+                console.error("Error cargando tareas:", error);
+                return;
+            }
+
             const cont = document.getElementById('listaTareas');
             cont.innerHTML = '';
 
+            if (!tareas || tareas.length === 0) {
+                cont.innerHTML = '<p class="text-center text-slate-400 py-20 italic bg-white rounded-[2rem]">No tienes tareas pendientes.</p>';
+                return;
+            }
+
             tareas.forEach(t => {
+                const materiaTag = t.materia_nombre ? t.materia_nombre : 'General';
                 cont.innerHTML += `
                     <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex justify-between items-center group">
                         <div class="flex-1">
-                            <span class="text-[9px] font-black bg-blue-100 text-blue-600 px-2 py-1 rounded-md uppercase">${t.materia_nombre || 'General'}</span>
+                            <span class="text-[9px] font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded uppercase tracking-tighter">${materiaTag}</span>
                             <h4 class="font-bold text-slate-800 text-lg mt-1">${t.titulo}</h4>
                             <p class="text-xs text-slate-500">${t.descripcion || ''}</p>
-                            <p class="text-[10px] font-bold text-slate-400 mt-2 tracking-widest uppercase">📅 ${t.fecha_entrega}</p>
+                            <p class="text-[10px] font-bold text-slate-400 mt-2 uppercase">📅 ${t.fecha_entrega}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="abrirModal('${t.id}', '${t.titulo}', '${t.fecha_entrega}', '${t.descripcion}', '${t.materia_nombre}')" 
-                                    class="bg-slate-50 text-slate-400 hover:text-blue-600 p-3 rounded-xl transition-colors">✏️</button>
+                            <button onclick="abrirModal('${t.id}', '${t.titulo}', '${t.fecha_entrega}', '${t.descripcion || ''}', '${t.materia_nombre || ''}')" 
+                                    class="bg-slate-50 text-slate-400 hover:text-blue-600 p-3 rounded-2xl transition-all">✏️</button>
                             <button onclick="borrarTarea('${t.id}')" 
-                                    class="bg-slate-50 text-slate-400 hover:text-red-500 p-3 rounded-xl transition-colors">🗑️</button>
+                                    class="bg-slate-50 text-slate-400 hover:text-red-500 p-3 rounded-2xl transition-all">🗑️</button>
                         </div>
                     </div>`;
             });
         }
 
-        // --- LÓGICA DEL MODAL ---
+        // 3. CREAR TAREA
+        async function crearTareaPropia() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const insert = {
+                alumno_id: user.id,
+                materia_nombre: document.getElementById('selectMateria').value,
+                titulo: document.getElementById('tituloT').value,
+                fecha_entrega: document.getElementById('fechaT').value,
+                descripcion: document.getElementById('descT').value,
+                terminada: false
+            };
+
+            if (!insert.titulo || !insert.fecha_entrega) return alert("Completa Título y Fecha");
+
+            const { error } = await supabaseClient.from('tareas').insert([insert]);
+            if (!error) {
+                document.getElementById('tituloT').value = '';
+                document.getElementById('fechaT').value = '';
+                document.getElementById('descT').value = '';
+                cargarTareas();
+            }
+        }
+
+        // 4. LÓGICA DE EDICIÓN
         function abrirModal(id, titulo, fecha, desc, materia) {
             document.getElementById('editId').value = id;
             document.getElementById('editTitulo').value = titulo;
             document.getElementById('editFecha').value = fecha;
-            document.getElementById('editDesc').value = desc === 'null' ? '' : desc;
+            document.getElementById('editDesc').value = desc;
             document.getElementById('editMateria').value = materia;
             document.getElementById('modalEditar').classList.remove('hidden');
         }
@@ -120,37 +180,20 @@
             };
 
             const { error } = await supabaseClient.from('tareas').update(updates).eq('id', id);
-            
             if (!error) {
                 cerrarModal();
                 cargarTareas();
-            } else {
-                alert("Error al actualizar");
             }
         }
 
-        // Funciones básicas de Crear y Borrar (ya las tenías)
-        async function crearTareaPropia() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const insert = {
-                alumno_id: user.id,
-                materia_nombre: document.getElementById('selectMateria').value,
-                titulo: document.getElementById('tituloT').value,
-                fecha_entrega: document.getElementById('fechaT').value,
-                descripcion: document.getElementById('descT').value,
-                terminada: false
-            };
-            const { error } = await supabaseClient.from('tareas').insert([insert]);
-            if (!error) location.reload();
-        }
-
         async function borrarTarea(id) {
-            if(confirm("¿Seguro?")) {
+            if (confirm("¿Eliminar esta tarea permanentemente?")) {
                 await supabaseClient.from('tareas').delete().eq('id', id);
                 cargarTareas();
             }
         }
 
+        // INICIALIZACIÓN
         cargarMaterias();
         cargarTareas();
     </script>
