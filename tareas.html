@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mis Pendientes | SchoolDash</title>
+    <title>Mis Tareas | SchoolDash</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -11,20 +11,20 @@
         <div class="container mx-auto flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <a href="estudiante.html" class="bg-slate-100 p-2 rounded-lg text-blue-600 font-bold text-xs">← Dashboard</a>
-                <span class="font-black text-slate-800 uppercase text-sm tracking-widest">Mi Agenda de Tareas</span>
+                <span class="font-black text-slate-800 uppercase text-sm tracking-widest">Organizador de Tareas</span>
             </div>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-4 max-w-4xl">
         <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 mb-10">
-            <h3 class="font-black text-slate-800 text-xl mb-6">Añadir Nuevo Pendiente</h3>
+            <h3 class="font-black text-slate-800 text-xl mb-6">Nueva Tarea Personal</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input id="tituloT" type="text" placeholder="¿Qué tienes que hacer?" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input id="tituloT" type="text" placeholder="¿Qué hay que hacer?" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
                 <input id="fechaT" type="date" class="p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                <textarea id="descT" placeholder="Detalles adicionales (opcional)..." class="md:col-span-2 p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-24"></textarea>
-                <button onclick="crearTareaPropia()" class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-                    + Guardar Tarea
+                <textarea id="descT" placeholder="Descripción corta..." class="md:col-span-2 p-4 rounded-2xl bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none h-20"></textarea>
+                <button onclick="crearTareaPropia()" class="md:col-span-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 transition">
+                    + Guardar en mi Agenda
                 </button>
             </div>
         </div>
@@ -34,37 +34,46 @@
     </main>
 
     <script>
-       const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
-      const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+     const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+      const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
         async function cargarTareas() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            
             const { data: tareas, error } = await supabaseClient
                 .from('tareas')
                 .select('*')
-                .eq('alumno_id', user.id) // Solo las mías
+                .eq('alumno_id', user.id)
                 .order('fecha_entrega', { ascending: true });
 
             const contenedor = document.getElementById('listaTareas');
             contenedor.innerHTML = '';
 
             if (!tareas || tareas.length === 0) {
-                contenedor.innerHTML = `<p class="text-center text-slate-400 py-10 italic">No tienes tareas registradas. ¡Buen trabajo!</p>`;
+                contenedor.innerHTML = `<p class="text-center text-slate-400 py-10 italic">No tienes tareas pendientes.</p>`;
                 return;
             }
 
             tareas.forEach(t => {
+                const estaTerminada = t.terminada;
                 contenedor.innerHTML += `
-                    <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 flex justify-between items-center group">
-                        <div>
-                            <h4 class="font-bold text-slate-800">${t.titulo}</h4>
-                            <p class="text-xs text-slate-500 mt-1">${t.descripcion || ''}</p>
-                            <div class="mt-2 text-[10px] font-bold text-blue-500 uppercase">📅 Entrega: ${t.fecha_entrega}</div>
+                    <div class="p-6 rounded-[1.5rem] shadow-sm border transition-all flex justify-between items-center ${estaTerminada ? 'bg-emerald-50 border-emerald-100 opacity-75' : 'bg-white border-slate-100'}">
+                        <div class="flex items-start gap-4">
+                            <input type="checkbox" ${estaTerminada ? 'checked' : ''} 
+                                   onchange="toggleTarea('${t.id}', ${estaTerminada})"
+                                   class="mt-1.5 w-5 h-5 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <div>
+                                <h4 class="font-bold ${estaTerminada ? 'text-emerald-800 line-through' : 'text-slate-800'}">${t.titulo}</h4>
+                                <p class="text-xs ${estaTerminada ? 'text-emerald-600' : 'text-slate-500'}">${t.descripcion || ''}</p>
+                                <div class="mt-2 text-[10px] font-bold uppercase ${estaTerminada ? 'text-emerald-500' : 'text-blue-500'}">
+                                    📅 ${t.fecha_entrega}
+                                </div>
+                            </div>
                         </div>
-                        <button onclick="borrarTarea('${t.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2">
-                            Eliminar
+                        <button onclick="borrarTarea('${t.id}')" class="text-slate-300 hover:text-red-500 p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                         </button>
                     </div>`;
             });
@@ -74,20 +83,14 @@
             const titulo = document.getElementById('tituloT').value;
             const fecha = document.getElementById('fechaT').value;
             const desc = document.getElementById('descT').value;
-
-            if (!titulo || !fecha) return alert("Por favor llena el título y la fecha");
+            if (!titulo || !fecha) return alert("Llena los campos obligatorios");
 
             const { data: { user } } = await supabaseClient.auth.getUser();
-
             const { error } = await supabaseClient.from('tareas').insert([{ 
-                alumno_id: user.id, 
-                titulo: titulo,
-                descripcion: desc,
-                fecha_entrega: fecha
+                alumno_id: user.id, titulo, descripcion: desc, fecha_entrega: fecha 
             }]);
 
-            if (error) alert(error.message);
-            else {
+            if (!error) {
                 document.getElementById('tituloT').value = '';
                 document.getElementById('fechaT').value = '';
                 document.getElementById('descT').value = '';
@@ -95,8 +98,17 @@
             }
         }
 
+        async function toggleTarea(id, estadoActual) {
+            const { error } = await supabaseClient
+                .from('tareas')
+                .update({ terminada: !estadoActual })
+                .eq('id', id);
+            
+            if (!error) cargarTareas();
+        }
+
         async function borrarTarea(id) {
-            if(!confirm("¿Tarea completada o eliminada?")) return;
+            if(!confirm("¿Eliminar esta tarea de la lista?")) return;
             await supabaseClient.from('tareas').delete().eq('id', id);
             cargarTareas();
         }
