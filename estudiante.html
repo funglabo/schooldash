@@ -38,7 +38,7 @@
 
         <div class="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-200 mb-10">
             <h1 class="text-4xl font-black">¡Hola, <span id="nombreAlumno">Estudiante</span>!</h1>
-            <p class="opacity-80 mt-2 font-medium">Bienvenido a tu panel personal. Aquí puedes gestionar tu semestre.</p>
+            <p class="opacity-80 mt-2 font-medium">Bienvenido a tu panel personal. Gestiona tus materias aquí.</p>
         </div>
 
         <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 mb-8">
@@ -53,15 +53,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 bg-slate-50 p-6 rounded-3xl border border-dashed border-slate-200">
                 <div class="flex flex-col gap-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Materia</label>
-                    <input id="nomMateria" type="text" placeholder="Ej: Matemáticas" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                    <input id="nomMateria" type="text" placeholder="Ej: Programación" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Profesor</label>
-                    <input id="profMateria" type="text" placeholder="Ej: Dr. García" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
+                    <input id="profMateria" type="text" placeholder="Ej: Ing. Pérez" class="p-3 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 shadow-sm">
                 </div>
                 <div class="flex items-end">
                     <button onclick="registrarMateria()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
-                        + Agregar Materia
+                        + Agregar
                     </button>
                 </div>
             </div>
@@ -79,29 +79,17 @@
       const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
         const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
 
-        // --- FUNCIÓN PRINCIPAL DE INICIO ---
+        // --- INICIO ---
         async function inicializarPanel() {
-            // Verificar sesión
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            // 1. Cargar Nombre del Perfil
-            const { data: perfil } = await supabaseClient
-                .from('perfiles')
-                .select('nombre_completo')
-                .eq('id', user.id)
-                .single();
-            
+            // 1. Cargar Nombre
+            const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
             if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Cargar Último Aviso del Admin
-            const { data: aviso } = await supabaseClient
-                .from('anuncios')
-                .select('contenido')
-                .order('creado_at', { ascending: false })
-                .limit(1)
-                .single();
-
+            // 2. Cargar Aviso
+            const { data: aviso } = await supabaseClient.from('anuncios').select('contenido').order('creado_at', { ascending: false }).limit(1).single();
             if (aviso) {
                 document.getElementById('contenedorAviso').classList.remove('hidden');
                 document.getElementById('textoAviso').innerText = aviso.contenido;
@@ -111,75 +99,60 @@
             cargarMaterias();
         }
 
-        // --- GESTIÓN DE MATERIAS ---
-
+        // --- FUNCIONES MATERIAS ---
         async function registrarMateria() {
             const nombre = document.getElementById('nomMateria').value;
             const profe = document.getElementById('profMateria').value;
-
-            if (!nombre) return alert("Por favor, escribe el nombre de la materia");
+            if (!nombre) return alert("Escribe el nombre de la materia");
 
             const { data: { user } } = await supabaseClient.auth.getUser();
+            const { error } = await supabaseClient.from('materias_alumno').insert([{ 
+                alumno_id: user.id, 
+                nombre_materia: nombre, 
+                profesor: profe 
+            }]);
 
-            const { error } = await supabaseClient.from('materias_alumno').insert([
-                { 
-                    alumno_id: user.id, 
-                    nombre_materia: nombre, 
-                    profesor: profe 
-                }
-            ]);
-
-            if (error) {
-                alert("Error al registrar: " + error.message);
-            } else {
+            if (error) alert(error.message);
+            else {
                 document.getElementById('nomMateria').value = '';
                 document.getElementById('profMateria').value = '';
-                cargarMaterias(); // Recargar lista
+                cargarMaterias();
             }
         }
 
         async function cargarMaterias() {
-            const { data: materias, error } = await supabaseClient
-                .from('materias_alumno')
-                .select('*')
-                .order('creado_at', { ascending: false });
-
+            const { data: materias, error } = await supabaseClient.from('materias_alumno').select('*').order('creado_at', { ascending: false });
             const contenedor = document.getElementById('listaMaterias');
             contenedor.innerHTML = '';
 
             if (error || !materias || materias.length === 0) {
-                contenedor.innerHTML = `
-                    <div class="col-span-2 py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                        <p class="text-slate-400 text-sm font-medium">Aún no has registrado ninguna materia.</p>
-                    </div>
-                `;
+                contenedor.innerHTML = `<div class="col-span-2 py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">No tienes materias registradas.</div>`;
                 return;
             }
 
             materias.forEach(m => {
                 contenedor.innerHTML += `
-                    <div class="flex justify-between items-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                    <div class="flex justify-between items-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
                         <div class="flex items-center gap-4">
-                            <div class="bg-blue-50 text-blue-500 p-2 rounded-lg text-xs font-bold">DOC</div>
+                            <div class="bg-blue-100 text-blue-600 p-3 rounded-xl text-xl">📚</div>
                             <div>
                                 <h4 class="font-bold text-slate-800">${m.nombre_materia}</h4>
-                                <p class="text-[11px] text-slate-500 font-medium">👨‍🏫 Prof. ${m.profesor || 'No especificado'}</p>
+                                <p class="text-[11px] text-slate-500 font-medium">PROF: ${m.profesor || 'Pendiente'}</p>
                             </div>
                         </div>
-                        <button onclick="borrarMateria('${m.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                        <button onclick="borrarMateria('${m.id}')" 
+                            class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                            Eliminar
                         </button>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
         async function borrarMateria(id) {
-            if(!confirm("¿Deseas eliminar esta materia de tu lista?")) return;
+            if(!confirm("¿Deseas eliminar esta materia?")) return;
             const { error } = await supabaseClient.from('materias_alumno').delete().eq('id', id);
-            if (!error) cargarMaterias();
+            if (error) alert(error.message);
+            else cargarMaterias();
         }
 
         async function cerrarSesion() {
@@ -187,7 +160,6 @@
             window.location.href = 'index.html';
         }
 
-        // Ejecutar al cargar
         inicializarPanel();
     </script>
 </body>
