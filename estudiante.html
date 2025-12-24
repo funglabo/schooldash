@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel | SchoolDash</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <nav class="bg-white border-b border-slate-200 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">🎓</div>
+                <span class="font-bold text-slate-800 text-xl">SchoolDash</span>
+            </div>
+            <button onclick="cerrarSesion()" class="text-slate-500 hover:text-red-600 font-medium transition">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-10 p-4">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl mb-8">
+            <h1 class="text-3xl font-bold">¡Hola, <span id="nombreAlumno">Cargando...</span>!</h1>
+            <p class="opacity-80 mt-2">Bienvenido a tu portal académico. Aquí podrás ver tus cursos y calificaciones.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 text-lg mb-4">Mis Calificaciones</h3>
+                <p class="text-slate-400 text-sm">No hay calificaciones registradas en este periodo.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 text-lg mb-4">Próximas Tareas</h3>
+                <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl text-slate-600 text-sm">
+                    <span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md font-bold">Próximamente</span>
+                    Configuración del perfil del estudiante.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- CONFIGURACIÓN (Pon tus llaves aquí) ---
+        const URL_PROYECTO = 'https://iobxbwwabjhulvukdtec.supabase.co'; 
+        const LLAVE_ANONIMA = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYnhid3dhYmpodWx2dWtkdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1NjA5MDUsImV4cCI6MjA4MjEzNjkwNX0.vjCu1ITPF140Px4NVKUOD7jl6BEvTEBhrAYqUBsXTqE';
+        const supabaseClient = supabase.createClient(URL_PROYECTO, LLAVE_ANONIMA);
+
+        async function cargarDatosEstudiante() {
+            // 1. Obtener el usuario logueado actualmente
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (!user) {
+                window.location.href = 'index.html'; // Si no hay sesión, volver al login
+                return;
+            }
+
+            // 2. Buscar su nombre en la tabla 'perfiles'
+            const { data: perfil, error } = await supabaseClient
+                .from('perfiles')
+                .select('nombre_completo')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error("Error al cargar perfil:", error);
+                document.getElementById('nombreAlumno').innerText = "Estudiante";
+            } else {
+                document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
+            }
+        }
+
+        async function cerrarSesion() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        // Ejecutar al cargar la página
+        cargarDatosEstudiante();
+    </script>
+</body>
+</html>
