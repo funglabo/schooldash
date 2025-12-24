@@ -9,41 +9,35 @@
 <body class="bg-slate-50 min-h-screen">
     <nav class="bg-white border-b p-4 shadow-sm">
         <div class="container mx-auto flex justify-between items-center">
-            <span class="font-black text-blue-600 text-xl">SchoolDash</span>
-            <button onclick="cerrarSesion()" class="text-slate-400 font-bold text-sm">Salir</button>
+            <span class="font-black text-blue-600 text-xl tracking-tighter italic">SchoolDash</span>
+            <button onclick="cerrarSesion()" class="text-slate-400 font-bold text-sm hover:text-red-500 transition">Cerrar Sesión</button>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-4 max-w-5xl">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <h1 class="text-3xl font-black text-slate-800">¡Hola, <span id="nombreAlumno">...</span>!</h1>
-                <p class="text-slate-500 font-medium">Este es el resumen de tu actividad académica.</p>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">¡Hola, <span id="nombreAlumno">...</span>!</h1>
+                <p class="text-slate-500 font-medium">Este es el resumen de tu estado académico actual.</p>
             </div>
-            <a href="materias.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-                Gestionar mis Materias →
-            </a>
+            <div class="flex gap-3">
+                <a href="materias.html" class="bg-slate-100 text-slate-700 px-6 py-4 rounded-2xl font-bold hover:bg-slate-200 transition">Materias</a>
+                <a href="tareas.html" class="bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 text-center">Ver Tareas</a>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Materias Inscritas</p>
-                <h2 id="totalMaterias" class="text-4xl font-black text-blue-600 mt-2">0</h2>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Mis Materias</p>
+                <h2 id="totalMaterias" class="text-5xl font-black text-blue-600 mt-2">0</h2>
             </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tareas Pendientes</p>
-                <h2 class="text-4xl font-black text-amber-500 mt-2">0</h2>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tareas Publicadas</p>
+                <h2 id="totalTareas" class="text-5xl font-black text-amber-500 mt-2">0</h2>
             </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Promedio General</p>
-                <h2 class="text-4xl font-black text-emerald-500 mt-2">--</h2>
-            </div>
-        </div>
-
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-            <h3 class="font-bold text-slate-800 text-xl mb-4">Próximas Tareas</h3>
-            <div class="py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                <p class="text-slate-400 text-sm italic">No hay tareas asignadas por el administrador.</p>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Mensajes Admin</p>
+                <h2 id="totalAvisos" class="text-5xl font-black text-emerald-500 mt-2">0</h2>
             </div>
         </div>
     </main>
@@ -57,17 +51,21 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = 'index.html';
 
-            // 1. Nombre
+            // 1. Obtener Nombre
             const { data: perfil } = await supabaseClient.from('perfiles').select('nombre_completo').eq('id', user.id).single();
             if (perfil) document.getElementById('nombreAlumno').innerText = perfil.nombre_completo;
 
-            // 2. Contar Materias
-            const { count } = await supabaseClient
-                .from('materias_alumno')
-                .select('*', { count: 'exact', head: true })
-                .eq('alumno_id', user.id);
-            
-            document.getElementById('totalMaterias').innerText = count || 0;
+            // 2. Contar Materias del alumno
+            const { count: cMaterias } = await supabaseClient.from('materias_alumno').select('*', { count: 'exact', head: true }).eq('alumno_id', user.id);
+            document.getElementById('totalMaterias').innerText = cMaterias || 0;
+
+            // 3. Contar Tareas totales (publicadas por admin)
+            const { count: cTareas } = await supabaseClient.from('tareas').select('*', { count: 'exact', head: true });
+            document.getElementById('totalTareas').innerText = cTareas || 0;
+
+            // 4. Contar Avisos (anuncios)
+            const { count: cAvisos } = await supabaseClient.from('anuncios').select('*', { count: 'exact', head: true });
+            document.getElementById('totalAvisos').innerText = cAvisos || 0;
         }
 
         async function cerrarSesion() {
